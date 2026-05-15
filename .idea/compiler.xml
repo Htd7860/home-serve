@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="hs-payment" />
+        <module name="hs-common" />
+        <module name="hs-message" />
+        <module name="hs-user" />
+        <module name="hs-marketing" />
+        <module name="hs-order" />
+        <module name="hs-catalog" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="home-serve" options="-parameters" />
+      <module name="hs-catalog" options="-parameters" />
+      <module name="hs-common" options="-parameters" />
+      <module name="hs-marketing" options="-parameters" />
+      <module name="hs-message" options="-parameters" />
+      <module name="hs-order" options="-parameters" />
+      <module name="hs-payment" options="-parameters" />
+      <module name="hs-user" options="-parameters" />
+    </option>
+  </component>
+</project>
