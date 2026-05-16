@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -10,6 +11,7 @@
         <module name="hs-common" />
         <module name="hs-message" />
         <module name="hs-user" />
+        <module name="hs-admin" />
         <module name="hs-marketing" />
         <module name="hs-order" />
         <module name="hs-catalog" />
@@ -19,6 +21,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="home-serve" options="-parameters" />
+      <module name="hs-admin" options="-parameters" />
       <module name="hs-catalog" options="-parameters" />
       <module name="hs-common" options="-parameters" />
       <module name="hs-marketing" options="-parameters" />
