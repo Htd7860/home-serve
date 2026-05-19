@@ -3,6 +3,7 @@ package com.qw.user.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
  * @since 2026-05-16
  */
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Workers implements Serializable {
@@ -67,14 +69,14 @@ public class Workers implements Serializable {
     private Integer categoryId;
 
     /**
-     * PENDING / APPROVED / REJECTED / DISABLED
+     * 0待审核 1通过 2拒绝 3禁用
      */
-    private String status;
+    private Integer status;
 
     /**
-     * UNVERIFIED / VERIFIED
+     * 0未认证 1已认证
      */
-    private String verifyStatus;
+    private Integer verifyStatus;
 
     /**
      * 平均评分
@@ -97,9 +99,9 @@ public class Workers implements Serializable {
     private Integer todayOrders;
 
     /**
-     * ONLINE / OFFLINE
+     * 0离线 1在线
      */
-    private String onlineStatus;
+    private Integer onlineStatus;
 
     /**
      * 最后上报经度
@@ -179,19 +181,19 @@ public class Workers implements Serializable {
         this.categoryId = categoryId;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public String getVerifyStatus() {
+    public Integer getVerifyStatus() {
         return verifyStatus;
     }
 
-    public void setVerifyStatus(String verifyStatus) {
+    public void setVerifyStatus(Integer verifyStatus) {
         this.verifyStatus = verifyStatus;
     }
 
@@ -227,11 +229,11 @@ public class Workers implements Serializable {
         this.todayOrders = todayOrders;
     }
 
-    public String getOnlineStatus() {
+    public Integer getOnlineStatus() {
         return onlineStatus;
     }
 
-    public void setOnlineStatus(String onlineStatus) {
+    public void setOnlineStatus(Integer onlineStatus) {
         this.onlineStatus = onlineStatus;
     }
 

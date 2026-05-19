@@ -23,5 +23,6 @@ public class LoginConstant {
     public static final Long FIXED_JWT_TIME=1000L*3600*2;
     public static final Long REFRESH_JWT_TIME=1000L*3600*24*7;
     public static final String  LOGIN_CODE_ERROR="验证码错误";
+    public static final String  REFRESH_ERROR="token失效";
 
 }

@@ -70,7 +70,7 @@ public class Users implements Serializable {
     /**
      * ACTIVE / DISABLED
      */
-    private String status;
+    private Integer status;
 
     /**
      * 最后登录时间
@@ -147,11 +147,11 @@ public class Users implements Serializable {
         this.wxUnionid = wxUnionid;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 

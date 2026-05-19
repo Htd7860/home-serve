@@ -1,8 +1,8 @@
 package com.qw.user.interceptor;
 
 import com.qw.user.annotation.RequireRole;
-import common.utils.JwtUtils;
-import common.utils.UserContext;
+import com.qw.common.utils.JwtUtils;
+import com.qw.common.utils.UserContext;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,8 +50,8 @@ public class LoginInterceptor implements HandlerInterceptor {
         if(handler instanceof HandlerMethod hm) {
             RequireRole methodAnnotation = hm.getMethodAnnotation(RequireRole.class);
             if (methodAnnotation != null) {
-                String[] value = methodAnnotation.value();
-                if (Arrays.asList(value).contains(UserContext.getLoginType())) {
+               String[] value = methodAnnotation.value();
+                if (Arrays.asList(value).contains(String.valueOf(UserContext.getLoginType()))) {
                     return true;
                 }
                 response.setStatus(403);

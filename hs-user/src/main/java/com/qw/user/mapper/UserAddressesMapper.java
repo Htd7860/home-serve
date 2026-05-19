@@ -1,7 +1,11 @@
 package com.qw.user.mapper;
 
+import com.qw.user.dto.AddressRequest;
 import com.qw.user.entity.UserAddresses;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -11,6 +15,27 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author qw
  * @since 2026-05-16
  */
-public interface UserAddressesMapper extends BaseMapper<UserAddresses> {
+@Mapper
+public interface UserAddressesMapper {
+    @Select("select * from user_addresses where user_id=#{userId} order by is_default desc")
+    List<UserAddresses> getAddressByUserId(Long userId);
 
+    @Insert("insert into user_addresses (user_id, contact_name, contact_phone, province, city, district, detail, lng, lat,created_at,is_default) " +
+            "values (#{userId},#{contactName},#{contactPhone},#{province},#{city},#{district},#{detail},#{lng},#{lat},#{createdAt},#{isDefault})")
+    void insertAddress(UserAddresses userAddresses);
+
+    @Select("select * from user_addresses where id=#{id} and user_id=#{userId}")
+    UserAddresses getAddressById(Long id,Long userId);
+
+    void updateUserAddress(UserAddresses userAddresses);
+
+    @Delete("delete from user_addresses where id=#{id} and user_id=#{userId}")
+    void deleteById(Long id, Long userId);
+
+
+    @Update("update user_addresses set is_default=1 where id=#{id} and user_id=#{userId}")
+    void changeDefaultAddress(Long id, Long userId);
+
+    @Update("update user_addresses set is_default=0 where user_id=#{userId}")
+    void restoreDefaultStatus(Long userId);
 }

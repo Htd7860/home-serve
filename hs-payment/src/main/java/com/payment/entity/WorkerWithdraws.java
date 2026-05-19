@@ -51,7 +51,7 @@ public class WorkerWithdraws implements Serializable {
     /**
      * PROCESSING / SUCCESS / FAILED
      */
-    private String status;
+    private Integer status;
 
     /**
      * 备注
@@ -110,11 +110,11 @@ public class WorkerWithdraws implements Serializable {
         this.bankCardNo = bankCardNo;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 

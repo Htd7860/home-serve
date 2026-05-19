@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RegisterRequest {
     @NotBlank
-    @Pattern(regexp = "\\w[1-10]",message = "昵称应由1-10个数字、字母、下划线组成")
+    @Pattern(regexp = "\\w{1,10}",message = "昵称应由1-10个数字、字母、下划线组成")
     String nickName;
     @NotBlank
     @Pattern(regexp = "^1[3-9]\\d{9}$",message = "手机号格式错误")
@@ -36,4 +36,9 @@ public class RegisterRequest {
     @Size(groups = OnPasswordRegister.class,min = 8, max = 32, message = "密码长度 8-32 位")
     @Pattern(groups = OnPasswordRegister.class,regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$", message = "密码需包含大小写字母和数字")
     String rePassword;
+    @Pattern(regexp = "^[1-9]\\d{5}(18|19|20)\\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$",groups = RegisterForWorker.class)
+    String idCard;
+    @Min(value = 1,groups=RegisterForWorker.class)
+    @Max(value=2,groups=RegisterForWorker.class)
+    Byte gender;
 }

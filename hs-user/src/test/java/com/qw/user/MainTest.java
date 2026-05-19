@@ -1,7 +1,6 @@
 package com.qw.user;
 
-import common.utils.PasswordUtils;
-import common.utils.RandomAuthCode;
+import com.qw.common.utils.PasswordUtils;
 import org.junit.jupiter.api.Test;
 
 /**

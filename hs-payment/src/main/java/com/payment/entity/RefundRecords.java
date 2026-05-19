@@ -51,12 +51,12 @@ public class RefundRecords implements Serializable {
     /**
      * PROCESSING / SUCCESS / FAILED
      */
-    private String status;
+    private Integer status;
 
     /**
      * 退款方式（原路返回）
      */
-    private String refundMethod;
+    private Integer refundMethod;
 
     private LocalDateTime createdAt;
 
@@ -110,19 +110,19 @@ public class RefundRecords implements Serializable {
         this.reason = reason;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public String getRefundMethod() {
+    public Integer getRefundMethod() {
         return refundMethod;
     }
 
-    public void setRefundMethod(String refundMethod) {
+    public void setRefundMethod(Integer refundMethod) {
         this.refundMethod = refundMethod;
     }
 

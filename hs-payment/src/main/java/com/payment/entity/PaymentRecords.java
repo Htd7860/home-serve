@@ -46,12 +46,12 @@ public class PaymentRecords implements Serializable {
     /**
      * BALANCE / WECHAT / ALIPAY
      */
-    private String method;
+    private Integer method;
 
     /**
      * PENDING / SUCCESS / FAILED
      */
-    private String status;
+    private Integer status;
 
     /**
      * 第三方支付流水号
@@ -105,19 +105,19 @@ public class PaymentRecords implements Serializable {
         this.amount = amount;
     }
 
-    public String getMethod() {
+    public Integer getMethod() {
         return method;
     }
 
-    public void setMethod(String method) {
+    public void setMethod(Integer method) {
         this.method = method;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 

@@ -1,5 +1,6 @@
 package com.qw.user.mapper;
 
+import com.qw.user.entity.UserAddresses;
 import com.qw.user.entity.Users;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,13 +28,12 @@ public interface UsersMapper{
     @Select("select * from users where phone=#{phone}")
     Users selectByPhone(String phone);
 
-    @Insert("insert into users (phone, password_hash, nickname, gender, created_at, updated_at) " +
-            "values (#{phone},#{passwordHash},#{nickname},#{gender},#{createdAt},#{updatedAt})")
-    void insertOne(Users user);
+    @Insert("insert into users (phone, password_hash, nickname, gender, created_at, updated_at,role) " +
+            "values (#{phone},#{passwordHash},#{nickname},#{gender},#{createdAt},#{updatedAt},#{loginType})")
+    void insertOne(Users user,Integer loginType);
 
-    @Select("select * from users where phone=#{phone}")
-    Users getByPhone(String phone);
 
     @Update("update users set last_login_at =#{time} where id=#{userId}")
     void updateLastLoginTime(LocalDateTime time,Long userId);
+
 }

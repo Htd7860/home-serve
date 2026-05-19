@@ -23,4 +23,7 @@ public interface WorkersMapper {
 
     @Select("select * from workers where phone=#{phone}")
     Workers getByPhone(String phone);
+
+    @Insert("insert into workers (phone,password_hash,name,id_card,gender) values (#{phone},#{passwordHash},#{name},#{idCard},#{gender})")
+    void insertByOne(Workers worker);
 }

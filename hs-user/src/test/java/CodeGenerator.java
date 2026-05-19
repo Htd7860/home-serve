@@ -1,6 +1,3 @@
-import com.baomidou.mybatisplus.generator.FastAutoGenerator;
-import common.utils.RandomAuthCode;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**

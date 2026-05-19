@@ -1,6 +1,6 @@
 package com.qw.user.exception;
 
-import common.result.Result;
+import com.qw.common.result.Result;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

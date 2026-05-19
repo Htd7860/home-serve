@@ -8,19 +8,18 @@ import com.qw.user.entity.Users;
 import com.qw.user.entity.Workers;
 import com.qw.user.mapper.UsersMapper;
 import com.qw.user.mapper.WorkersMapper;
-import common.result.Result;
-import common.utils.JwtUtils;
-import common.utils.PasswordUtils;
-import common.utils.RandomAuthCode;
+import com.qw.common.result.Result;
+import com.qw.common.utils.JwtUtils;
+import com.qw.common.utils.PasswordUtils;
+import com.qw.common.utils.RandomAuthCode;
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.scheduler.Scheduler;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +41,7 @@ public class AuthController {
     StringRedisTemplate stringRedisTemplate;
     @Autowired
     UsersMapper usersMapper;
-    @Autowired
+   @Autowired
     WorkersMapper workersMapper;
 
     @Operation(summary = "发送验证码(登录)")
@@ -121,7 +120,8 @@ public class AuthController {
             if (user == null) {
                 return Result.fail(LoginConstant.PHONE_NOT_EXISTS);
             }
-            if (loginRequest.getCode().equals(stringRedisTemplate.opsForValue().get(RedisConstant.LOGIN_PHONE_KEY_PREFIX+phone))) {
+            String code=stringRedisTemplate.opsForValue().get(RedisConstant.LOGIN_PHONE_KEY_PREFIX+phone);
+            if (code!=null&&code.equals(loginRequest.getCode())) {
                 LoginResponse response = usersLoginCallback(phone, loginRequest);
                 return Result.ok(response);
             }
@@ -131,7 +131,8 @@ public class AuthController {
             if (workers == null) {
                 return Result.fail(LoginConstant.PHONE_NOT_EXISTS);
             }
-            if (loginRequest.getCode().equals(stringRedisTemplate.opsForValue().get(RedisConstant.LOGIN_PHONE_KEY_PREFIX+phone))) {
+            String storedCode = stringRedisTemplate.opsForValue().get(RedisConstant.LOGIN_PHONE_KEY_PREFIX + phone);
+            if (storedCode != null && loginRequest.getCode().equals(storedCode)) {
                 LoginResponse response=workersLoginCallback(loginRequest,phone);
                 return Result.ok(response);
             }
@@ -144,14 +145,33 @@ public class AuthController {
     public Result registerByPwd(@Validated(OnPasswordRegister.class) @RequestBody RegisterRequest registerRequest) {
 
         String phone = registerRequest.getPhone();
-        Users byPhone = usersMapper.getByPhone(phone);
+        Users byPhone = usersMapper.selectByPhone(phone);
         if (byPhone != null) {
             return Result.fail(RegisterConstant.REGISTER_ALREADY_HAVE);
         }
-        if (!registerRequest.getRePassword().equals(registerRequest.getRePassword())) {
+        if (!registerRequest.getPassword().equals(registerRequest.getRePassword())) {
             return Result.fail(RegisterConstant.REGISTER_PASSWORD_NOT_SAME);
         }
         insertUsers(registerRequest);
+        return Result.ok();
+    }
+
+    @Operation(summary = "工作者密码注册")
+    @PostMapping("/registerByPwdToWorker")
+    public Result registerByPwdToWorkers(@Validated({OnPasswordRegister.class,RegisterForWorker.class}) @RequestBody RegisterRequest registerRequest) {
+
+        String phone = registerRequest.getPhone();
+        Workers byPhone = workersMapper.getByPhone(phone);
+        if (byPhone != null) {
+            return Result.fail(RegisterConstant.REGISTER_ALREADY_HAVE);
+        }
+        if (!registerRequest.getPassword().equals(registerRequest.getRePassword())) {
+            return Result.fail(RegisterConstant.REGISTER_PASSWORD_NOT_SAME);
+        }
+
+        Workers workers=Workers.builder().idCard(registerRequest.getIdCard()).passwordHash(PasswordUtils.encode(registerRequest.getPassword())
+        ).gender(registerRequest.getGender()).name(registerRequest.getNickName()).phone(registerRequest.getPhone()).build();
+        workersMapper.insertByOne(workers);
         return Result.ok();
     }
 
@@ -162,10 +182,28 @@ public class AuthController {
         String code = registerRequest.getCode();
 
         if (!code.equals(stringRedisTemplate.opsForValue().get(RedisConstant.REGISTER_PHONE_KEY_PREFIX + registerRequest.getPhone()))) {
-            Result.fail(RegisterConstant.REGISTER_CODE_ERROR);
+            return Result.fail(RegisterConstant.REGISTER_CODE_ERROR);
         }
-        insertUsers(registerRequest);
+        insertUsersWithoutPassword(registerRequest);
         return Result.ok();
+    }
+
+    @Operation(summary = "刷新token")
+    @PostMapping("/refreshToken")
+    public Result<LoginResponse> refreshToken(@RequestBody RefreshRequest refreshRequest){
+        String olderFreshToken = refreshRequest.getRefreshToken();
+        Claims claims = JwtUtils.parseToken(olderFreshToken);
+        Long userId = Long.parseLong(claims.getSubject());
+        String loginType=(String) claims.get("loginType");
+        String s = stringRedisTemplate.opsForValue().get(RedisConstant.AUTH_REFRESH_TOKEN + userId);
+        if(s==null||!s.equals(olderFreshToken)){
+            return Result.fail(LoginConstant.REFRESH_ERROR);
+        };
+        String newToken=JwtUtils.createToken(userId,loginType,LoginConstant.FIXED_JWT_TIME,null);
+        String newFreshToken=JwtUtils.createToken(userId,loginType,LoginConstant.REFRESH_JWT_TIME,null);
+        stringRedisTemplate.opsForValue().set(RedisConstant.AUTH_REFRESH_TOKEN+userId,newFreshToken,7,TimeUnit.DAYS);
+        return Result.ok(LoginResponse.builder().userId(userId).token(newToken).refreshToken(newFreshToken)
+                .loginType(Integer.parseInt(loginType)).build());
     }
 
     private void insertUsers(RegisterRequest registerRequest) {
@@ -174,16 +212,24 @@ public class AuthController {
                 .passwordHash(PasswordUtils.encode(registerRequest.getPassword()))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now()).build();
-        usersMapper.insertOne(users);
+        usersMapper.insertOne(users,registerRequest.getRegisterType());
+    }
+
+    private void insertUsersWithoutPassword(RegisterRequest registerRequest) {
+        Users users = Users.builder().nickname(registerRequest.getNickName())
+                .phone(registerRequest.getPhone())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now()).build();
+        usersMapper.insertOne(users,registerRequest.getRegisterType());
     }
 
     private LoginResponse usersLoginCallback(String phone, LoginRequest loginRequest) {
-        Users users = usersMapper.getByPhone(phone);
+        Users users = usersMapper.selectByPhone(phone);
         Long userId = users.getId();
         usersMapper.updateLastLoginTime(LocalDateTime.now(), userId);
         String token = JwtUtils.createToken(userId, loginRequest.getLoginType().toString(), LoginConstant.FIXED_JWT_TIME, null);
         String refreshToken = JwtUtils.createToken(userId, loginRequest.getLoginType().toString(), LoginConstant.REFRESH_JWT_TIME, null);
-        stringRedisTemplate.opsForValue().set(RedisConstant.AUTH_REFRESH_TOKEN + phone, refreshToken, 7, TimeUnit.DAYS);
+        stringRedisTemplate.opsForValue().set(RedisConstant.AUTH_REFRESH_TOKEN + userId, refreshToken, 7, TimeUnit.DAYS);
         return new LoginResponse(token, refreshToken, userId, loginRequest.getLoginType(), users.getAvatarUrl(), users.getNickname());
     }
 
@@ -192,7 +238,7 @@ public class AuthController {
         Long userId = worker.getId();
         String token = JwtUtils.createToken(userId, loginRequest.getLoginType().toString(), LoginConstant.FIXED_JWT_TIME, null);
         String refreshToken = JwtUtils.createToken(userId, loginRequest.getLoginType().toString(), LoginConstant.REFRESH_JWT_TIME, null);
-        stringRedisTemplate.opsForValue().set(RedisConstant.AUTH_REFRESH_TOKEN + phone, refreshToken, 7, TimeUnit.DAYS);
+        stringRedisTemplate.opsForValue().set(RedisConstant.AUTH_REFRESH_TOKEN + userId, refreshToken, 7, TimeUnit.DAYS);
         return new LoginResponse(token, refreshToken, userId, loginRequest.getLoginType(), worker.getAvatarUrl(), worker.getName());
     }
 }
