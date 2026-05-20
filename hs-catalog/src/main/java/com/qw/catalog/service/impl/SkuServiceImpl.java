@@ -84,6 +84,7 @@ public class SkuServiceImpl implements ISkuService {
     public ServiceSkus getById(Long id) throws JsonProcessingException {
         ServiceSkus skus= (ServiceSkus) skuCache.get(CaffeineConstant.SKUS_SINGLE_PREFIX+id, key->{
             String json = stringRedisTemplate.opsForValue().get(RedisConstant.SKUS_SINGLE_PREFIX + id);
+            if(json==null){return null;}
             if("".equals(json)){return new ServiceSkus();}
             ServiceSkus skus1=null;
             try {
@@ -114,6 +115,7 @@ public class SkuServiceImpl implements ISkuService {
         List<PricingRules> list= (List<PricingRules>) skuCache.get(CaffeineConstant.PRICING_RULE_KEY, key->{
                 String json = stringRedisTemplate.opsForValue().get(RedisConstant.PRICING_RULE_KEY);
                 List<PricingRules> rules=null;
+                if(json==null){return null;}
                 try {
                     rules= objectMapper.readValue(json, new TypeReference<List<PricingRules>>() {
                    });
@@ -135,6 +137,7 @@ public class SkuServiceImpl implements ISkuService {
         if(list==null){return new BigDecimal[]{baseMoney,BigDecimal.ZERO,BigDecimal.ZERO};}
         BigDecimal[] res=new BigDecimal[3];
         BigDecimal sum=BigDecimal.ZERO;
+        res[1]=BigDecimal.ZERO;
         for (PricingRules rules : list) {
             String ruleConfig = rules.getRuleConfig();
             JSONObject jsonObject = JSON.parseObject(ruleConfig);

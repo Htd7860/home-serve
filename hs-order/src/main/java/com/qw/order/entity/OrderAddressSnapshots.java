@@ -3,6 +3,8 @@ package com.qw.order.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Builder;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -14,6 +16,7 @@ import java.math.BigDecimal;
  * @author qw
  * @since 2026-05-16
  */
+@Builder
 @TableName("order_address_snapshots")
 public class OrderAddressSnapshots implements Serializable {
 

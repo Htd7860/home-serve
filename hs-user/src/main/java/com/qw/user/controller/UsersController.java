@@ -1,7 +1,7 @@
 package com.qw.user.controller;
 
-import com.qw.user.dto.AddressRequest;
-import com.qw.user.service.IUserService;
+import com.qw.common.dto.AddressRequest;
+import com.qw.common.service.IUserService;
 import com.qw.common.result.Result;
 import com.qw.common.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;

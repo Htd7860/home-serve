@@ -88,6 +88,7 @@
                 <scope>runtime</scope>
             </dependency>
 
+
         </dependencies>
     </dependencyManagement>
 
@@ -96,7 +97,7 @@
     <artifactId>home-serve</artifactId>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>hs-com.qw.common</module>
+        <module>hs-common</module>
         <module>hs-user</module>
         <module>hs-catalog</module>
         <module>hs-order</module>

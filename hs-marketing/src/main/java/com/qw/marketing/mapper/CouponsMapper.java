@@ -30,4 +30,10 @@ public interface CouponsMapper {
 
     @Select("select * from coupon_templates where id=#{id}")
     CouponTemplates getTemplatesById(Long id);
+
+    @Select("select * from user_coupons where id=#{id} and user_id=#{userId}")
+    UserCoupons getUserCouponsByid(Long id,Long userId);
+
+    @Update("update user_coupons set status=1,user_order_id=#{orderId} where id=#{couponId}")
+    void deleteUserCouponsById(Long couponId,Long orderId);
 }

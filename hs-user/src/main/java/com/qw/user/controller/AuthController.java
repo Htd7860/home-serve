@@ -1,13 +1,13 @@
 package com.qw.user.controller;
 
+import com.qw.common.dto.*;
 import com.qw.user.constant.LoginConstant;
 import com.qw.user.constant.RedisConstant;
 import com.qw.user.constant.RegisterConstant;
-import com.qw.user.dto.*;
-import com.qw.user.entity.Users;
-import com.qw.user.entity.Workers;
-import com.qw.user.mapper.UsersMapper;
-import com.qw.user.mapper.WorkersMapper;
+import com.qw.common.entity.Users;
+import com.qw.common.entity.Workers;
+import com.qw.common.mapper.UsersMapper;
+import com.qw.common.mapper.WorkersMapper;
 import com.qw.common.result.Result;
 import com.qw.common.utils.JwtUtils;
 import com.qw.common.utils.PasswordUtils;

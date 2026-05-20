@@ -9,7 +9,7 @@ spring:
     password: 502938
 
     mybatis-plus:
-      mapper-locations: classpath*:/mapper/**/*.xml
+      mapper-locations: classpath*:/com.qw.admin.mapper/**/*.xml
       type-aliases-package: com.qw
       global-config:
         db-config:

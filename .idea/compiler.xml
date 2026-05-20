@@ -8,8 +8,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="hs-payment" />
-        <module name="hs-common" />
         <module name="hs-message" />
+        <module name="hs-common" />
         <module name="hs-user" />
         <module name="hs-admin" />
         <module name="hs-marketing" />

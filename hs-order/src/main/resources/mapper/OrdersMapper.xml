@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qw.order.mapper.OrdersMapper">
+    <insert id="insertOrders" useGeneratedKeys="true" keyProperty="id">
+        insert into orders (order_no,user_id,sku_id,category_id,address_id,status,base_price
+        ,distance_fee,time_surcharge,coupon_discount,final_price,pay_status,pay_method,user_remark,created_at,is_urgent,appointment_time,urgent_fee)
+        values (#{orderNo},#{userId},#{skuId},#{categoryId},#{addressId},#{status},#{basePrice},#{distanceFee},
+                #{timeSurcharge},#{couponDiscount},#{finalPrice},#{payStatus},#{payMethod},#{userRemark},#{createdAt},#{isUrgent},#{appointmentTime},#{urgentFee})
+    </insert>
+
+    <select id="getMyOrders" resultType="com.qw.order.entity.Orders">
+        select * from orders where user_id=#{userId} <if test="status!=null">and status=#{status}</if>
+    order by created_at desc
+    </select>
+
+    <update id="updateOrders" >
+        update orders <set>
+        <if test="status!=null">
+            status=#{status},
+        </if><if test="payStatus!=null">pay_status=#{payStatus},</if><if test="payTime!=null">pay_time=#{payTime}</if>
+        <if test="updatedAt!=null">updated_at=#{updatedAt}</if>
+</set> where id=#{id}
+    </update>
+</mapper>

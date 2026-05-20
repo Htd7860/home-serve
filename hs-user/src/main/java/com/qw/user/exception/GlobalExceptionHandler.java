@@ -1,5 +1,6 @@
 package com.qw.user.exception;
 
+import com.qw.common.exception.BizException;
 import com.qw.common.result.Result;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,4 +22,8 @@ public class GlobalExceptionHandler {
         return Result.fail(methodArgumentNotValidException.getMessage());
     }
 
+    @ExceptionHandler(BizException.class)
+    public Result handleBizException(BizException bizException){
+        return Result.fail(bizException.getCode(),bizException.getMessage());
+    }
 }

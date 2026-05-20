@@ -2,6 +2,12 @@ package com.qw.order.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,6 +20,10 @@ import java.time.LocalDateTime;
  * @author qw
  * @since 2026-05-16
  */
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Orders implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -97,7 +107,7 @@ public class Orders implements Serializable {
     /**
      * BALANCE / WECHAT / ALIPAY
      */
-    private String payMethod;
+    private Integer payMethod;
 
     /**
      * 支付时间
@@ -112,7 +122,7 @@ public class Orders implements Serializable {
     /**
      * 紧急订单走派单
      */
-    private Byte isUrgent;
+    private Integer isUrgent;
 
     /**
      * 用户备注
@@ -132,226 +142,6 @@ public class Orders implements Serializable {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+    private BigDecimal urgentFee;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getOrderNo() {
-        return orderNo;
-    }
-
-    public void setOrderNo(String orderNo) {
-        this.orderNo = orderNo;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getWorkerId() {
-        return workerId;
-    }
-
-    public void setWorkerId(Long workerId) {
-        this.workerId = workerId;
-    }
-
-    public Long getSkuId() {
-        return skuId;
-    }
-
-    public void setSkuId(Long skuId) {
-        this.skuId = skuId;
-    }
-
-    public Integer getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public Long getAddressId() {
-        return addressId;
-    }
-
-    public void setAddressId(Long addressId) {
-        this.addressId = addressId;
-    }
-
-    public LocalDateTime getAppointmentTime() {
-        return appointmentTime;
-    }
-
-    public void setAppointmentTime(LocalDateTime appointmentTime) {
-        this.appointmentTime = appointmentTime;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public BigDecimal getBasePrice() {
-        return basePrice;
-    }
-
-    public void setBasePrice(BigDecimal basePrice) {
-        this.basePrice = basePrice;
-    }
-
-    public BigDecimal getDistanceFee() {
-        return distanceFee;
-    }
-
-    public void setDistanceFee(BigDecimal distanceFee) {
-        this.distanceFee = distanceFee;
-    }
-
-    public BigDecimal getTimeSurcharge() {
-        return timeSurcharge;
-    }
-
-    public void setTimeSurcharge(BigDecimal timeSurcharge) {
-        this.timeSurcharge = timeSurcharge;
-    }
-
-    public BigDecimal getCouponDiscount() {
-        return couponDiscount;
-    }
-
-    public void setCouponDiscount(BigDecimal couponDiscount) {
-        this.couponDiscount = couponDiscount;
-    }
-
-    public BigDecimal getFinalPrice() {
-        return finalPrice;
-    }
-
-    public void setFinalPrice(BigDecimal finalPrice) {
-        this.finalPrice = finalPrice;
-    }
-
-    public Integer getPayStatus() {
-        return payStatus;
-    }
-
-    public void setPayStatus(Integer payStatus) {
-        this.payStatus = payStatus;
-    }
-
-    public String getPayMethod() {
-        return payMethod;
-    }
-
-    public void setPayMethod(String payMethod) {
-        this.payMethod = payMethod;
-    }
-
-    public LocalDateTime getPayTime() {
-        return payTime;
-    }
-
-    public void setPayTime(LocalDateTime payTime) {
-        this.payTime = payTime;
-    }
-
-    public Byte getIsVip() {
-        return isVip;
-    }
-
-    public void setIsVip(Byte isVip) {
-        this.isVip = isVip;
-    }
-
-    public Byte getIsUrgent() {
-        return isUrgent;
-    }
-
-    public void setIsUrgent(Byte isUrgent) {
-        this.isUrgent = isUrgent;
-    }
-
-    public String getUserRemark() {
-        return userRemark;
-    }
-
-    public void setUserRemark(String userRemark) {
-        this.userRemark = userRemark;
-    }
-
-    public LocalDateTime getConfirmTime() {
-        return confirmTime;
-    }
-
-    public void setConfirmTime(LocalDateTime confirmTime) {
-        this.confirmTime = confirmTime;
-    }
-
-    public Byte getAutoConfirm() {
-        return autoConfirm;
-    }
-
-    public void setAutoConfirm(Byte autoConfirm) {
-        this.autoConfirm = autoConfirm;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public String toString() {
-        return "Orders{" +
-        "id = " + id +
-        ", orderNo = " + orderNo +
-        ", userId = " + userId +
-        ", workerId = " + workerId +
-        ", skuId = " + skuId +
-        ", categoryId = " + categoryId +
-        ", addressId = " + addressId +
-        ", appointmentTime = " + appointmentTime +
-        ", status = " + status +
-        ", basePrice = " + basePrice +
-        ", distanceFee = " + distanceFee +
-        ", timeSurcharge = " + timeSurcharge +
-        ", couponDiscount = " + couponDiscount +
-        ", finalPrice = " + finalPrice +
-        ", payStatus = " + payStatus +
-        ", payMethod = " + payMethod +
-        ", payTime = " + payTime +
-        ", isVip = " + isVip +
-        ", isUrgent = " + isUrgent +
-        ", userRemark = " + userRemark +
-        ", confirmTime = " + confirmTime +
-        ", autoConfirm = " + autoConfirm +
-        ", createdAt = " + createdAt +
-        ", updatedAt = " + updatedAt +
-        "}";
-    }
 }

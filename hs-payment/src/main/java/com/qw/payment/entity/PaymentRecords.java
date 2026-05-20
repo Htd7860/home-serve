@@ -1,4 +1,4 @@
-package com.qw.order.entity;
+package com.qw.payment.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -9,22 +9,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
  * <p>
- * 订单状态变更流水
+ * 支付流水
  * </p>
  *
  * @author qw
  * @since 2026-05-16
  */
 @Builder
-@TableName("order_events")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class OrderEvents implements Serializable {
+@TableName("payment_records")
+public class PaymentRecords implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,48 +33,61 @@ public class OrderEvents implements Serializable {
     private Long id;
 
     /**
+     * 支付流水号
+     */
+    private String paymentNo;
+
+    /**
      * 订单ID
      */
     private Long orderId;
 
     /**
-     * 变更前状态
+     * 用户ID
      */
-    private Integer fromStatus;
+    private Long userId;
 
     /**
-     * 变更后状态
+     * 支付金额
      */
-    private Integer toStatus;
+    private BigDecimal amount;
 
     /**
-     * USER / WORKER / SYSTEM
+     * BALANCE / WECHAT / ALIPAY
      */
-    private Integer operatorType;
+    private Integer method;
 
     /**
-     * 操作人ID
+     * PENDING / SUCCESS / FAILED
      */
-    private Long operatorId;
+    private Integer status;
 
     /**
-     * 备注
+     * 第三方支付流水号
      */
-    private String remark;
+    private String thirdPartyNo;
+
+    /**
+     * 支付完成时间
+     */
+    private LocalDateTime paidAt;
 
     private LocalDateTime createdAt;
 
 
+
     @Override
     public String toString() {
-        return "OrderEvents{" +
+        return "PaymentRecords{" +
         "id = " + id +
+        ", paymentNo = " + paymentNo +
         ", orderId = " + orderId +
-        ", fromStatus = " + fromStatus +
-        ", toStatus = " + toStatus +
-        ", operatorType = " + operatorType +
-        ", operatorId = " + operatorId +
-        ", remark = " + remark +
+        ", userId = " + userId +
+        ", amount = " + amount +
+        ", method = " + method +
+        ", status = " + status +
+        ", thirdPartyNo = " + thirdPartyNo +
+        ", paidAt = " + paidAt +
         ", createdAt = " + createdAt +
         "}";
     }
