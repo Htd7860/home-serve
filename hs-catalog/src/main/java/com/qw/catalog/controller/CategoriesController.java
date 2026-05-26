@@ -5,6 +5,7 @@ import com.qw.catalog.constant.RedisConstant;
 import com.qw.catalog.entity.ServiceCategories;
 import com.qw.catalog.service.ICategoriesService;
 import com.qw.common.result.Result;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,12 +24,14 @@ public class CategoriesController {
     ICategoriesService categoriesServiceImpl;
 
     @GetMapping
-    public Result<List<ServiceCategories>> list() throws JsonProcessingException {
+    @Operation(summary = "查看所有分类")
+    public Result<List<ServiceCategories>> list() {
         List<ServiceCategories> list = categoriesServiceImpl.list();
         return Result.ok(list);
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "根据id查找分类")
     public Result getById(@PathVariable Long id) throws JsonProcessingException {
         ServiceCategories categories = categoriesServiceImpl.getById(id);
         if (categories == null) {

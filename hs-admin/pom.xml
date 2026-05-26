@@ -17,6 +17,11 @@
             <artifactId>hs-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.qw</groupId>
+            <artifactId>hs-catalog</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <properties>

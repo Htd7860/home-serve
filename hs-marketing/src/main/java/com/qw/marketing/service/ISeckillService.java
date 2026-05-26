@@ -14,4 +14,6 @@ import java.util.List;
  */
 public interface ISeckillService {
     List<SeckillActivities> getSeckillActivities();
+
+    Long grabSeckill(Long activityId);
 }

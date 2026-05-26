@@ -2,6 +2,7 @@ package com.qw.worker.controller;
 
 import com.qw.common.result.Result;
 import com.qw.worker.service.IWorkerService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ public class WorkerOrderController {
     IWorkerService workerServiceImpl;
 
     @PostMapping("/{id}/grab")
+    @Operation(summary = "抢单")
     public Result grabOrder(@PathVariable Long id){
         workerServiceImpl.grabOrder(id);
         return Result.ok();

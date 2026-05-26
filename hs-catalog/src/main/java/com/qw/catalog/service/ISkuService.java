@@ -16,7 +16,7 @@ import java.util.List;
  * @Filename：ISkuService
  */
 public interface ISkuService {
-    List<ServiceSkus> getByCategory(Long id) throws JsonProcessingException;
-    ServiceSkus getById(Long id) throws JsonProcessingException;
+    List<ServiceSkus> getByCategory(Integer id);
+    ServiceSkus getById(Long id);
     BigDecimal[] calculateMoney(LocalDateTime appointTime, BigDecimal baseMoney,boolean haveDis,Double distance);
 }

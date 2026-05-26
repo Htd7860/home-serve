@@ -1,6 +1,7 @@
 package com.qw.catalog.mapper;
 
 import com.qw.catalog.entity.ServiceCategories;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -22,4 +23,12 @@ public interface CategoriesMapper {
 
     @Select("select * from service_categories where id=#{id}")
     ServiceCategories getById(Long id);
+
+
+    void insertWithOne(ServiceCategories categories);
+
+    int updateCategoryById(ServiceCategories categories);
+
+    @Delete("delete from service_categories where id=#{id}")
+    int deleteById(Integer id);
 }

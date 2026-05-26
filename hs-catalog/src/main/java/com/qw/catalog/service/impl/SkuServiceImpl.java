@@ -13,6 +13,7 @@ import com.qw.catalog.entity.ServiceSkus;
 import com.qw.catalog.mapper.PricingRuleMapper;
 import com.qw.catalog.mapper.SkuMapper;
 import com.qw.catalog.service.ISkuService;
+import com.qw.common.exception.BizException;
 import com.qw.common.utils.RandomTTL;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class SkuServiceImpl implements ISkuService {
     @Autowired
     PricingRuleMapper pricingRuleMapper;
     @Override
-    public List<ServiceSkus> getByCategory(Long id) throws JsonProcessingException {
+    public List<ServiceSkus> getByCategory(Integer id) {
         List<ServiceSkus> skus = (List<ServiceSkus>) skuCache.get(CaffeineConstant.SKUS_PREFIX + id, key -> {
             String json = stringRedisTemplate.opsForValue().get(RedisConstant.SKUS_PREFIX + id);
             if ("".equals(json)) {
@@ -70,7 +71,13 @@ public class SkuServiceImpl implements ISkuService {
                 return null;
             }
             skuCache.put(CaffeineConstant.SKUS_PREFIX + id, sk);
-            String json = objectMapper.writeValueAsString(sk);
+            String json = null;
+            try {
+                json = objectMapper.writeValueAsString(sk);
+            } catch (JsonProcessingException e) {
+                log.error("{}",e);
+                throw new BizException("格式化失败");
+            }
             stringRedisTemplate.opsForValue().set(RedisConstant.SKUS_PREFIX + id, json, RandomTTL.randomTTL(30));
             skus = sk;
         }
@@ -81,7 +88,7 @@ public class SkuServiceImpl implements ISkuService {
     }
 
     @Override
-    public ServiceSkus getById(Long id) throws JsonProcessingException {
+    public ServiceSkus getById(Long id){
         ServiceSkus skus= (ServiceSkus) skuCache.get(CaffeineConstant.SKUS_SINGLE_PREFIX+id, key->{
             String json = stringRedisTemplate.opsForValue().get(RedisConstant.SKUS_SINGLE_PREFIX + id);
             if(json==null){return null;}
@@ -102,7 +109,12 @@ public class SkuServiceImpl implements ISkuService {
                 stringRedisTemplate.opsForValue().set(RedisConstant.SKUS_SINGLE_PREFIX+id,"",RandomTTL.randomTTL(1L));
                 return null;
             }
-            stringRedisTemplate.opsForValue().set(RedisConstant.SKUS_SINGLE_PREFIX+id,objectMapper.writeValueAsString(byId), RandomTTL.randomTTL(30L));
+            try {
+                stringRedisTemplate.opsForValue().set(RedisConstant.SKUS_SINGLE_PREFIX+id,objectMapper.writeValueAsString(byId), RandomTTL.randomTTL(30L));
+            } catch (JsonProcessingException e) {
+                log.error("{}",e);
+                throw new BizException("格式化失败");
+            }
             skuCache.put(CaffeineConstant.SKUS_SINGLE_PREFIX+id,byId);
             skus=byId;
         }

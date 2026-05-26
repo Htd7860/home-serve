@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -36,4 +37,13 @@ public interface WorkersMapper {
 
     @Update("update workers set last_lng=#{lng},last_lat=#{lat},updated_at=NOW() where id =#{id}")
     void updateWorkerLocation(Long id, BigDecimal lng,BigDecimal lat);
+
+    @Select("select * from workers where status=0")
+    List<Workers> getPendingWorkers();
+
+    @Update("update workers set status=1 where id=#{id}")
+    int approveById(Long id);
+
+    @Update("update workers set status=2 where id=#{id}")
+    int rejectById(Long id);
 }

@@ -25,7 +25,7 @@ public class SkuController {
 
     @Operation(summary = "根据分类查询服务")
     @GetMapping
-    public Result getByCategory(Long id) throws JsonProcessingException {
+    public Result getByCategory(Integer id) throws JsonProcessingException {
         List<ServiceSkus> skus = skuServiceImpl.getByCategory(id);
         if (skus == null) {
             return Result.fail(RedisConstant.CATEGORIES_SKUS_NOT_EXIST);

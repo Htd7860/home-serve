@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qw.catalog.mapper.SkuMapper">
+    <update id="updateSku">
+        update service_skus <set>
+        <if test="categoryId!=null">
+            category_id=#{categoryId},
+        </if><if test="name!=null">`name`=#{name},</if><if test="description!=null">description=#{description},</if>
+        <if test="coverImage!=null">cover_image=#{coverImage},</if><if test="basePrice!=null">base_price=#{basePrice},</if>
+        <if test="durationMinutes!=null">duration_minutes=#{durationMinutes},</if><if test="unit!=null">unit=#{unit},</if>
+            <if test="updatedAt!=null">updated_at=#{updatedAt},</if>
+    </set> where id=#{id}
+    </update>
+</mapper>

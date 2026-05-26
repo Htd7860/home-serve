@@ -1,6 +1,7 @@
 package com.qw.catalog.mapper;
 
 import com.qw.catalog.entity.ServiceSkus;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -17,8 +18,17 @@ import java.util.List;
 @Mapper
 public interface SkuMapper {
     @Select("select * from service_skus where category_id=#{id}")
-    List<ServiceSkus> getByCategory(Long id);
+    List<ServiceSkus> getByCategory(Integer id);
 
     @Select("select * from service_skus where id=#{id}")
     ServiceSkus getById(Long id);
+
+    @Insert("insert into service_skus (category_id, name, description, cover_image, base_price, duration_minutes, unit, sales_count, status, created_at, updated_at) " +
+            "values (#{categoryId},#{name},#{description},#{coverImage},#{basePrice},#{durationMinutes},#{unit},#{salesCount},#{status},now(),now()) ")
+    int insertWithImg(ServiceSkus sku);
+    @Insert("insert into service_skus (category_id, name, description, base_price, duration_minutes, unit, sales_count, status, created_at, updated_at) " +
+            "values (#{categoryId},#{name},#{description},#{basePrice},#{durationMinutes},#{unit},#{salesCount},#{status},now(),now()) ")
+    int insertWithNoImg(ServiceSkus sku);
+
+    int updateSku(ServiceSkus sku);
 }

@@ -8,12 +8,11 @@ spring:
     username: root
     password: 502938
 
-    mybatis-plus:
-      mapper-locations: classpath*:/com.qw.admin.mapper/**/*.xml
-      type-aliases-package: com.qw
-      global-config:
-        db-config:
-          id-type: auto
+mybatis-plus:
+  type-aliases-package: com.qw
+  global-config:
+    db-config:
+      id-type: auto
 rocketmq:
   name-server: localhost:9876
   producer:

@@ -13,4 +13,5 @@ public class CaffeineConstant {
     public static String  SKUS_PREFIX="service_skus:";
     public static String  SKUS_SINGLE_PREFIX="service_skus:single:";
     public static String  PRICING_RULE_KEY="pricing_rule";
+    public static final String ALL_CATEGORIES="cache:all_categories";
 }

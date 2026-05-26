@@ -15,7 +15,8 @@ import java.util.List;
  */
 public interface ICategoriesService {
 
-    List<ServiceCategories> list() throws JsonProcessingException;
+    List<ServiceCategories> list();
 
-    ServiceCategories getById(Long id) throws JsonProcessingException;
+    ServiceCategories getById(Long id);
+
 }

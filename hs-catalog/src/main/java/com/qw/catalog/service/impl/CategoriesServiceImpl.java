@@ -9,6 +9,7 @@ import com.qw.catalog.constant.RedisConstant;
 import com.qw.catalog.entity.ServiceCategories;
 import com.qw.catalog.mapper.CategoriesMapper;
 import com.qw.catalog.service.ICategoriesService;
+import com.qw.common.exception.BizException;
 import com.qw.common.utils.RandomTTL;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class CategoriesServiceImpl implements ICategoriesService {
     ObjectMapper objectMapper;
 
     @Override
-    public List<ServiceCategories> list() throws JsonProcessingException {
+    public List<ServiceCategories> list()  {
         List<ServiceCategories> list = (List<ServiceCategories>) categoriesCache.get(RedisConstant.ALL_CATEGORIES, K -> {
             String json = stringRedisTemplate.opsForValue().get(RedisConstant.ALL_CATEGORIES);
             List<ServiceCategories> temp = null;
@@ -47,7 +48,13 @@ public class CategoriesServiceImpl implements ICategoriesService {
         if (list == null) {
             log.info("没有命中缓存");
             list = categoriesMapper.list();
-            String json = objectMapper.writeValueAsString(list);
+            String json = null;
+            try {
+                json = objectMapper.writeValueAsString(list);
+            } catch (JsonProcessingException e) {
+                log.error("{}",e);
+                throw new BizException("格式化失败");
+            }
             stringRedisTemplate.opsForValue().set(RedisConstant.ALL_CATEGORIES, json, RandomTTL.randomTTL(30));
             categoriesCache.put(RedisConstant.ALL_CATEGORIES, list);
         }
@@ -55,7 +62,7 @@ public class CategoriesServiceImpl implements ICategoriesService {
     }
 
     @Override
-    public ServiceCategories getById(Long id) throws JsonProcessingException {
+    public ServiceCategories getById(Long id) {
         ServiceCategories categories = (ServiceCategories) categoriesCache.get(CaffeineConstant.CATEGORY_PREFIX + id, key -> {
             String json = stringRedisTemplate.opsForValue().get(RedisConstant.CATEGORIES_PREFIX + id);
             if ("".equals(json)) {
@@ -76,7 +83,13 @@ public class CategoriesServiceImpl implements ICategoriesService {
                 stringRedisTemplate.opsForValue().set(RedisConstant.CATEGORIES_PREFIX + id, "", RandomTTL.randomTTL(1L));
                 return null;
             }
-            String json = objectMapper.writeValueAsString(sc);
+            String json = null;
+            try {
+                json = objectMapper.writeValueAsString(sc);
+            } catch (JsonProcessingException e) {
+                log.error("{}",e);
+                throw new BizException("格式化失败");
+            }
             stringRedisTemplate.opsForValue().set(RedisConstant.CATEGORIES_PREFIX + id, json, RandomTTL.randomTTL(30L));
             categoriesCache.put(CaffeineConstant.CATEGORY_PREFIX + id, sc);
             categories = sc;

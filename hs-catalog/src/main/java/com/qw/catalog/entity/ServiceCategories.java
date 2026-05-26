@@ -3,6 +3,11 @@ package com.qw.catalog.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -14,7 +19,11 @@ import java.time.LocalDateTime;
  * @author qw
  * @since 2026-05-16
  */
+@Builder
 @TableName("service_categories")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ServiceCategories implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -44,63 +53,5 @@ public class ServiceCategories implements Serializable {
 
     private LocalDateTime createdAt;
 
-    public Integer getId() {
-        return id;
-    }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getIconUrl() {
-        return iconUrl;
-    }
-
-    public void setIconUrl(String iconUrl) {
-        this.iconUrl = iconUrl;
-    }
-
-    public Integer getSortOrder() {
-        return sortOrder;
-    }
-
-    public void setSortOrder(Integer sortOrder) {
-        this.sortOrder = sortOrder;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Override
-    public String toString() {
-        return "ServiceCategories{" +
-        "id = " + id +
-        ", name = " + name +
-        ", iconUrl = " + iconUrl +
-        ", sortOrder = " + sortOrder +
-        ", status = " + status +
-        ", createdAt = " + createdAt +
-        "}";
-    }
 }
