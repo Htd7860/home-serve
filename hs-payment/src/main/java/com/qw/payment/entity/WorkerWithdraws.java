@@ -3,6 +3,11 @@ package com.qw.payment.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,6 +20,10 @@ import java.time.LocalDateTime;
  * @author qw
  * @since 2026-05-16
  */
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 @TableName("worker_withdraws")
 public class WorkerWithdraws implements Serializable {
 
@@ -62,99 +71,4 @@ public class WorkerWithdraws implements Serializable {
 
     private LocalDateTime updatedAt;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getWithdrawNo() {
-        return withdrawNo;
-    }
-
-    public void setWithdrawNo(String withdrawNo) {
-        this.withdrawNo = withdrawNo;
-    }
-
-    public Long getWorkerId() {
-        return workerId;
-    }
-
-    public void setWorkerId(Long workerId) {
-        this.workerId = workerId;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public String getBankName() {
-        return bankName;
-    }
-
-    public void setBankName(String bankName) {
-        this.bankName = bankName;
-    }
-
-    public String getBankCardNo() {
-        return bankCardNo;
-    }
-
-    public void setBankCardNo(String bankCardNo) {
-        this.bankCardNo = bankCardNo;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public String toString() {
-        return "WorkerWithdraws{" +
-        "id = " + id +
-        ", withdrawNo = " + withdrawNo +
-        ", workerId = " + workerId +
-        ", amount = " + amount +
-        ", bankName = " + bankName +
-        ", bankCardNo = " + bankCardNo +
-        ", status = " + status +
-        ", remark = " + remark +
-        ", createdAt = " + createdAt +
-        ", updatedAt = " + updatedAt +
-        "}";
-    }
 }

@@ -46,4 +46,10 @@ public interface OrdersMapper{
     List<OrderEvents> getOrderEventByOrderId(Long id);
 
     void updateOrders(Orders orders);
+
+    @Select("select * from orders where worker_id=#{id} order by created_at desc")
+    List<Orders> getOrdersByWorkerId(Long id);
+
+    @Select("select * from order_address_snapshots where order_id=#{orderId}")
+    OrderAddressSnapshots getOrderAddressSnapshotsByOrderId(Long orderId);
 }

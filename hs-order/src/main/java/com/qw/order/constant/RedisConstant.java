@@ -9,4 +9,5 @@ package com.qw.order.constant;
  * @Filename：RedisConstant
  */
 public class RedisConstant {
+    public static final String ORDER_READY_PREFIX="order:grab:";
 }

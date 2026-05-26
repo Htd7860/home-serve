@@ -18,8 +18,9 @@
         update orders <set>
         <if test="status!=null">
             status=#{status},
-        </if><if test="payStatus!=null">pay_status=#{payStatus},</if><if test="payTime!=null">pay_time=#{payTime}</if>
-        <if test="updatedAt!=null">updated_at=#{updatedAt}</if>
+        </if><if test="payStatus!=null">pay_status=#{payStatus},</if><if test="payTime!=null">pay_time=#{payTime},</if>
+            <if test="workerId!=null">worker_id=#{workerId},</if>
+        <if test="updatedAt!=null">updated_at=#{updatedAt},</if>
 </set> where id=#{id}
     </update>
 </mapper>

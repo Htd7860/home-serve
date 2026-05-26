@@ -74,21 +74,4 @@ public class PaymentRecords implements Serializable {
 
     private LocalDateTime createdAt;
 
-
-
-    @Override
-    public String toString() {
-        return "PaymentRecords{" +
-        "id = " + id +
-        ", paymentNo = " + paymentNo +
-        ", orderId = " + orderId +
-        ", userId = " + userId +
-        ", amount = " + amount +
-        ", method = " + method +
-        ", status = " + status +
-        ", thirdPartyNo = " + thirdPartyNo +
-        ", paidAt = " + paidAt +
-        ", createdAt = " + createdAt +
-        "}";
-    }
 }

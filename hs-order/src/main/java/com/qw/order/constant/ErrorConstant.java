@@ -16,4 +16,6 @@ public class ErrorConstant {
     public static final String APPOINT_TIME_ERROR="预约时间太早";
     public static final String ORDER_AUTH_ERROR="没有权限访问该订单";
     public static final String ORDER_STATUS_ERROR="订单状态错误";
+    public static final String JSON_PARSE_ERROR="json解析失败";
+
 }

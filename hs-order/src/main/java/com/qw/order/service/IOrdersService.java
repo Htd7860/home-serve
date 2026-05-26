@@ -32,4 +32,6 @@ public interface IOrdersService {
     void cancelOrder(Long id);
 
  void confirmOrder(Long id);
+
+    void refund(Long userId, Long id);
 }

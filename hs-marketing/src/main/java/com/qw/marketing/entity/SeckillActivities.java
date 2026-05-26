@@ -3,9 +3,17 @@ package com.qw.marketing.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
-
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Data
 @TableName("seckill_activities")
 public class SeckillActivities implements Serializable {
 
@@ -61,108 +69,5 @@ public class SeckillActivities implements Serializable {
 
     private LocalDateTime createdAt;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getActivityName() {
-        return activityName;
-    }
-
-    public void setActivityName(String activityName) {
-        this.activityName = activityName;
-    }
-
-    public Long getTemplateId() {
-        return templateId;
-    }
-
-    public void setTemplateId(Long templateId) {
-        this.templateId = templateId;
-    }
-
-    public Integer getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public Integer getTotalStock() {
-        return totalStock;
-    }
-
-    public void setTotalStock(Integer totalStock) {
-        this.totalStock = totalStock;
-    }
-
-    public Integer getLimitPerUser() {
-        return limitPerUser;
-    }
-
-    public void setLimitPerUser(Integer limitPerUser) {
-        this.limitPerUser = limitPerUser;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public LocalDateTime getPreheatTime() {
-        return preheatTime;
-    }
-
-    public void setPreheatTime(LocalDateTime preheatTime) {
-        this.preheatTime = preheatTime;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Override
-    public String toString() {
-        return "SeckillActivities{" +
-        "id = " + id +
-        ", activityName = " + activityName +
-        ", templateId = " + templateId +
-        ", categoryId = " + categoryId +
-        ", totalStock = " + totalStock +
-        ", limitPerUser = " + limitPerUser +
-        ", startTime = " + startTime +
-        ", endTime = " + endTime +
-        ", preheatTime = " + preheatTime +
-        ", status = " + status +
-        ", createdAt = " + createdAt +
-        "}";
-    }
 }

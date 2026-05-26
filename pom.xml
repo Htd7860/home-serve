@@ -87,7 +87,11 @@
                 <version>0.12.6</version>
                 <scope>runtime</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>2.2.3</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -105,6 +109,7 @@
         <module>hs-marketing</module>
         <module>hs-message</module>
         <module>hs-admin</module>
+        <module>hs-worker</module>
     </modules>
     <packaging>pom</packaging>
     <properties>

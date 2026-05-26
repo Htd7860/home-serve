@@ -14,6 +14,7 @@
         <module name="hs-admin" />
         <module name="hs-marketing" />
         <module name="hs-order" />
+        <module name="hs-worker" />
         <module name="hs-catalog" />
       </profile>
     </annotationProcessing>
@@ -29,6 +30,7 @@
       <module name="hs-order" options="-parameters" />
       <module name="hs-payment" options="-parameters" />
       <module name="hs-user" options="-parameters" />
+      <module name="hs-worker" options="-parameters" />
     </option>
   </component>
 </project>

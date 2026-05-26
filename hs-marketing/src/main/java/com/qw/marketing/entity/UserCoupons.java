@@ -3,7 +3,10 @@ package com.qw.marketing.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -16,6 +19,9 @@ import java.time.LocalDateTime;
  * @author qw
  * @since 2026-05-16
  */
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 @TableName("user_coupons")
 @Builder
 public class UserCoupons implements Serializable {
@@ -57,81 +63,5 @@ public class UserCoupons implements Serializable {
 
     private LocalDateTime createdAt;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getTemplateId() {
-        return templateId;
-    }
-
-    public void setTemplateId(Long templateId) {
-        this.templateId = templateId;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Long getUsedOrderId() {
-        return usedOrderId;
-    }
-
-    public void setUsedOrderId(Long usedOrderId) {
-        this.usedOrderId = usedOrderId;
-    }
-
-    public LocalDateTime getExpireTime() {
-        return expireTime;
-    }
-
-    public void setExpireTime(LocalDateTime expireTime) {
-        this.expireTime = expireTime;
-    }
-
-    public LocalDateTime getUsedAt() {
-        return usedAt;
-    }
-
-    public void setUsedAt(LocalDateTime usedAt) {
-        this.usedAt = usedAt;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Override
-    public String toString() {
-        return "UserCoupons{" +
-        "id = " + id +
-        ", userId = " + userId +
-        ", templateId = " + templateId +
-        ", status = " + status +
-        ", usedOrderId = " + usedOrderId +
-        ", expireTime = " + expireTime +
-        ", usedAt = " + usedAt +
-        ", createdAt = " + createdAt +
-        "}";
-    }
 }

@@ -76,4 +76,11 @@ public class OrdersController {
         ordersServiceImpl.confirmOrder(id);
         return Result.ok();
     }
+
+    @Operation(summary = "申请退款")
+    @PostMapping("/{id}/refund")
+    public Result refund(@PathVariable Long id){
+        ordersServiceImpl.refund(UserContext.getUserId(),id);
+        return Result.ok();
+    }
 }

@@ -2,6 +2,7 @@ package com.qw.order.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.qw.catalog.entity.ServiceSkus;
 import com.qw.catalog.service.ISkuService;
@@ -15,8 +16,11 @@ import com.qw.marketing.entity.CouponTemplates;
 import com.qw.marketing.entity.UserCoupons;
 import com.qw.marketing.mapper.CouponsMapper;
 import com.qw.marketing.service.ICouponService;
+import com.qw.message.constant.RocketMQConstant;
+import com.qw.message.dto.OrderBroadcastMessage;
 import com.qw.order.constant.ErrorConstant;
 import com.qw.order.constant.OrderConstant;
+import com.qw.order.constant.RedisConstant;
 import com.qw.order.dto.CreateOrderRequest;
 import com.qw.order.dto.OrderDetailResponse;
 import com.qw.order.entity.OrderAddressSnapshots;
@@ -26,9 +30,13 @@ import com.qw.order.mapper.OrdersMapper;
 import com.qw.order.service.IOrdersService;
 import com.qw.payment.entity.PaymentRecords;
 import com.qw.payment.mapper.PaymentMapper;
+import com.qw.payment.service.WalletService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +68,12 @@ public class OrdersServiceImpl  implements IOrdersService {
     OrdersMapper ordersMapper;
     @Autowired
     PaymentMapper paymentMapper;
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    WalletService walletService;
 
     @Transactional
     @Override
@@ -184,7 +198,16 @@ public class OrdersServiceImpl  implements IOrdersService {
         OrderEvents orderEvents=OrderEvents.builder().orderId(id).operatorType(3).fromStatus(0).toStatus(0)
                 .remark(OrderConstant.ORDER_PAY_SUCCESS).build();
         ordersMapper.insertOrderEvent(orderEvents);
-    // todo 广播给服务者
+
+        stringRedisTemplate.opsForValue().set(RedisConstant.ORDER_READY_PREFIX+id,"0");
+
+        OrderAddressSnapshots orderAddressSnapshots=ordersMapper.getOrderAddressSnapshotsByOrderId(id);
+        OrderBroadcastMessage message=OrderBroadcastMessage.builder().orderId(id).categoryId(order.getCategoryId())
+                .appointmentTime(order.getAppointmentTime()).lat(orderAddressSnapshots.getLat())
+                .lng(orderAddressSnapshots.getLng()).finalPrice(order.getFinalPrice())
+                .build();
+
+        rocketMQTemplate.syncSend(RocketMQConstant.ORDER_TOPIC+":"+RocketMQConstant.TAG_ORDER_PAID,message);
     }
 
     @Transactional
@@ -226,7 +249,24 @@ public class OrdersServiceImpl  implements IOrdersService {
         OrderEvents orderEvents=OrderEvents.builder().orderId(id).operatorType(1).operatorId(UserContext.getUserId()).fromStatus(3).toStatus(4)
                 .remark(OrderConstant.ORDER_CONFIRM_SUCCESS).build();
         ordersMapper.insertOrderEvent(orderEvents);
-        //todo 分账给服务者
+
+        walletService.settle(order.getWorkerId(),id,order.getFinalPrice());
+    }
+
+    @Transactional
+    @Override
+    public void refund(Long userId, Long id) {
+        Orders order=ordersMapper.getOrderById(id);
+        if(order==null||!(order.getUserId().equals(userId))){throw new BizException("没有操作权限");}
+        if(order.getStatus()==0&&order.getPayStatus()==1){
+            Orders newOrder=Orders.builder().status(7).id(id).payStatus(4).updatedAt(LocalDateTime.now()).build();
+            ordersMapper.updateOrders(newOrder);
+            OrderEvents events=OrderEvents.builder().orderId(id).operatorType(1).operatorId(userId).remark("用户退款")
+                    .fromStatus(order.getStatus()).toStatus(7).createdAt(LocalDateTime.now()).build();
+            ordersMapper.insertOrderEvent(events);
+            return;
+        }
+        throw new BizException("商家已接单，无法退款");
     }
 
 
