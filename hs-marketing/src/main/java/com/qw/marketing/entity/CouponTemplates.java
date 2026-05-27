@@ -58,11 +58,6 @@ public class CouponTemplates implements Serializable {
     private BigDecimal discountRate;
 
     /**
-     * 最高抵扣金额（折扣券）
-     */
-    private BigDecimal maxDiscount;
-
-    /**
      * 总发行量
      */
     private Integer totalQuantity;
@@ -81,6 +76,11 @@ public class CouponTemplates implements Serializable {
      * 已领取数量
      */
     private Integer receivedCount;
+
+    /**
+     * 0普通券 1秒杀券
+     */
+    private Integer type;
 
     /**
      * 1启用 0禁用

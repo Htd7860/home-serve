@@ -1,6 +1,7 @@
 package com.qw.worker.controller;
 
 import com.qw.common.result.Result;
+import com.qw.user.annotation.RequireRole;
 import com.qw.worker.service.IWorkerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,7 @@ public class WorkerOrderController {
     @Autowired
     IWorkerService workerServiceImpl;
 
+    @RequireRole({"2"})
     @PostMapping("/{id}/grab")
     @Operation(summary = "抢单")
     public Result grabOrder(@PathVariable Long id){

@@ -10,4 +10,5 @@ package com.qw.common.constant;
  */
 public class RedisConstant {
     public static final String WORKER_LOCATION="workers:location";
+    public static final String SECKILL_STOCK_PREFIX="seckill:stock:";
 }

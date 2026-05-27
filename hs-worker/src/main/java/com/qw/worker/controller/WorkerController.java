@@ -1,6 +1,7 @@
 package com.qw.worker.controller;
 
 import com.qw.common.result.Result;
+import com.qw.user.annotation.RequireRole;
 import com.qw.worker.dto.LocationRequest;
 import com.qw.worker.service.IWorkerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,12 +25,14 @@ public class WorkerController {
     @Autowired
     IWorkerService workerServiceImpl;
 
+    @RequireRole({"2"})
     @Operation(summary = "获得服务者信息")
     @GetMapping("/profile")
     public Result getProfile(){
         return Result.ok(workerServiceImpl.getProfile());
     }
 
+    @RequireRole({"2"})
     @Operation(summary = "切换在线状态")
     @PutMapping("/online")
     public Result updateOnlineStatus(@RequestParam Integer status){
@@ -37,6 +40,7 @@ public class WorkerController {
         return Result.ok();
     }
 
+    @RequireRole({"2"})
     @Operation(summary = "实时更新位置")
     @PutMapping("/location")
     public Result updateLocation(@Validated @RequestBody LocationRequest locationRequest){
@@ -44,12 +48,14 @@ public class WorkerController {
         return Result.ok();
     }
 
+    @RequireRole({"2"})
     @Operation(summary = "获取当前的订单")
     @GetMapping("/orders")
     public Result getMyOrders(){
         return Result.ok(workerServiceImpl.getMyOrder());
     }
 
+    @RequireRole({"2"})
     @Operation(summary = "开始服务")
     @PutMapping("/orders/{id}/start")
     public Result startService(@PathVariable Long id){
@@ -57,6 +63,7 @@ public class WorkerController {
         return Result.ok();
     }
 
+    @RequireRole({"2"})
     @Operation(summary = "完成服务")
     @PutMapping("/orders/{id}/complete")
     public Result endService(@PathVariable Long id){

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.qw.catalog.entity.ServiceSkus;
 import com.qw.catalog.service.ISkuService;
+import com.qw.common.entity.Notifications;
 import com.qw.common.entity.UserAddresses;
 import com.qw.common.exception.BizException;
 import com.qw.common.service.IAddressService;
@@ -80,12 +81,7 @@ public class OrdersServiceImpl  implements IOrdersService {
     public void  createOrder(CreateOrderRequest req, Long userid) {
         //进行sku以及地址的校验
         ServiceSkus serviceSkus=null;
-        try {
-            serviceSkus=skuServiceImpl.getById(req.getSkuId());
-        } catch (JsonProcessingException e) {
-            log.error("{}",e);
-
-        }
+        serviceSkus=skuServiceImpl.getById(req.getSkuId());
         if(serviceSkus==null){ throw new BizException(ErrorConstant.SERVICE_NOT_FIND);}
         Integer categoryId = serviceSkus.getCategoryId();
         UserAddresses address= userServiceImpl.getAddressById(req.getAddressId());
@@ -188,6 +184,14 @@ public class OrdersServiceImpl  implements IOrdersService {
         }
         //todo 支付模块
 
+
+        //发送订单消息
+        Notifications notifications=Notifications.builder().notificationType(2).createdAt(LocalDateTime.now())
+                        .receiverType(0).receiverId(order.getUserId()).relatedOrderId(id).title("订单支付成功")
+                        .content("您已成功完成订单支付,订单号为:"+order.getOrderNo()+"支付金额为"+order.getFinalPrice()).build();
+        rocketMQTemplate.syncSend(com.qw.common.constant.RocketMQConstant.NOTIFICATION_TOPIC,notifications);
+
+
         order.setPayStatus(1);order.setPayTime(LocalDateTime.now());
         ordersMapper.updateOrders(order);
         PaymentRecords paymentRecords=PaymentRecords.builder().paymentNo("PAY:"+OrderNoUtils.generateOrderNo()).orderId(id).method(1)
@@ -251,6 +255,11 @@ public class OrdersServiceImpl  implements IOrdersService {
         ordersMapper.insertOrderEvent(orderEvents);
 
         walletService.settle(order.getWorkerId(),id,order.getFinalPrice());
+
+        Notifications n = Notifications.builder().notificationType(2).createdAt(LocalDateTime.now())
+                .receiverType(1).receiverId(order.getWorkerId()).relatedOrderId(id)
+                .title("订单已验收").content("订单" + order.getOrderNo() + "已被用户确认验收").build();
+        rocketMQTemplate.syncSend(com.qw.common.constant.RocketMQConstant.NOTIFICATION_TOPIC, n);
     }
 
     @Transactional

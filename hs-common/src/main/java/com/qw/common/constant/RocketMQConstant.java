@@ -11,4 +11,5 @@ package com.qw.common.constant;
 public class RocketMQConstant {
     public static final String SECKILL_TOPIC="seckill-topic";
     public static final String SECKILL_GRAB_TAG="seckill-grab-tag";
+    public static final String NOTIFICATION_TOPIC="notification-topic";
 }

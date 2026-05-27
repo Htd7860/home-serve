@@ -18,7 +18,7 @@ import java.util.List;
 public interface CouponsMapper {
     List<UserCoupons> getCouponsByStatus(@Param("status") Integer status, @Param("userId") Long userId);
 
-    @Select("select * from coupon_templates where total_quantity > received_count")
+    @Select("select * from coupon_templates where type = 0 and status = 1")
     List<CouponTemplates> getAvailableCoupons();
 
     @Update("update coupon_templates set received_count=received_count+1 where received_count< total_quantity and id=#{id}")
@@ -36,4 +36,19 @@ public interface CouponsMapper {
 
     @Update("update user_coupons set status=1,user_order_id=#{orderId} where id=#{couponId}")
     void deleteUserCouponsById(Long couponId,Long orderId);
+
+    @Select("select * from user_coupons where user_id=#{userId} and template_id=#{templateId}")
+    UserCoupons getByUserAndTemplate(@Param("userId") Long userId, @Param("templateId") Long templateId);
+
+    @Select("select * from coupon_templates order by created_at desc")
+    List<CouponTemplates> listAllTemplates();
+
+    @Insert("insert into coupon_templates (coupon_name, coupon_type, threshold_amount, discount_amount, discount_rate, valid_days, category_id, type, status, created_at) " +
+            "values (#{couponName},#{couponType},#{thresholdAmount},#{discountAmount},#{discountRate},#{validDays},#{categoryId},#{type},#{status},now())")
+    int insertTemplate(CouponTemplates template);
+
+    @Update("update coupon_templates set coupon_name=#{couponName},coupon_type=#{couponType}," +
+            "threshold_amount=#{thresholdAmount},discount_amount=#{discountAmount},discount_rate=#{discountRate}," +
+            "valid_days=#{validDays},category_id=#{categoryId},type=#{type},status=#{status} where id=#{id}")
+    int updateTemplate(CouponTemplates template);
 }

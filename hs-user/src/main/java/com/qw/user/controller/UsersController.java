@@ -4,6 +4,7 @@ import com.qw.common.dto.AddressRequest;
 import com.qw.common.service.IUserService;
 import com.qw.common.result.Result;
 import com.qw.common.utils.UserContext;
+import com.qw.user.annotation.RequireRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,12 +29,14 @@ public class UsersController {
     @Autowired
     IUserService userServiceImpl;
 
+    @RequireRole({"1"})
     @Operation(summary = "按照用户id查询地址")
     @GetMapping("/me/addresses")
     public Result getMyAddress(){
         return Result.ok(userServiceImpl.getAddressByUserId(UserContext.getUserId()));
     }
 
+    @RequireRole({"1"})
     @Operation(summary = "新增个人地址")
     @PostMapping("/me/addresses")
     public Result addNewAddress(@Valid @RequestBody AddressRequest addressRequest){
@@ -41,12 +44,14 @@ public class UsersController {
         return  Result.ok();
     }
 
+    @RequireRole({"1"})
     @Operation(summary = "按照id查询地址")
     @GetMapping("/me/addresses/{id}")
     public Result getAddress(@PathVariable Long id){
         return Result.ok(userServiceImpl.getAddressById(id));
     }
 
+    @RequireRole({"1"})
     @Operation(summary = "根据id修改地址")
     @PutMapping("/me/addresses/{id}")
     public Result updateAddress(@PathVariable Long id,@RequestBody AddressRequest addressRequest){
@@ -54,6 +59,7 @@ public class UsersController {
         return Result.ok();
     }
 
+    @RequireRole({"1"})
     @Operation(summary = "删除地址")
     @DeleteMapping("/me/addresses/{id}")
     public Result deleteAddress(@PathVariable Long id){
@@ -61,6 +67,7 @@ public class UsersController {
         return Result.ok();
     }
 
+    @RequireRole({"1"})
     @Operation(summary = "修改默认地址")
     @PutMapping("/me/addresses/{id}/default")
     public Result changeDefaultAddress(@PathVariable Long id){

@@ -1,5 +1,7 @@
 package com.qw.worker.service.impl;
 
+import com.qw.common.constant.RocketMQConstant;
+import com.qw.common.entity.Notifications;
 import com.qw.common.entity.Workers;
 import com.qw.common.exception.BizException;
 import com.qw.common.mapper.WorkersMapper;
@@ -13,6 +15,7 @@ import com.qw.worker.constant.RemarkConstant;
 import com.qw.worker.dto.LocationRequest;
 import com.qw.worker.service.IWorkerService;
 import jakarta.annotation.PostConstruct;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.geo.Point;
@@ -43,6 +46,8 @@ public class WorkerServiceImpl implements IWorkerService {
     DefaultRedisScript<Long> script;
     @Autowired
     OrdersMapper ordersMapper;
+    @Autowired
+    RocketMQTemplate rocketMQTemplate;
 
     @PostConstruct
     private void init(){
@@ -87,6 +92,11 @@ public class WorkerServiceImpl implements IWorkerService {
                     .operatorType(2).operatorId(workerId).remark(RemarkConstant.ORDER_HAVE_BE_GRAB).build();
             ordersMapper.insertOrderEvent(events);
             stringRedisTemplate.delete(RedisConstant.ORDER_GRAB_PREFIX+orderId);
+            Orders grabbed = ordersMapper.getOrderById(orderId);
+            Notifications n = Notifications.builder().notificationType(2).createdAt(LocalDateTime.now())
+                    .receiverType(0).receiverId(grabbed.getUserId()).relatedOrderId(orderId)
+                    .title("服务者已接单").content("您的订单" + grabbed.getOrderNo() + "已被服务者接单").build();
+            rocketMQTemplate.syncSend(RocketMQConstant.NOTIFICATION_TOPIC, n);
         }
         return workerId;
     }
@@ -127,6 +137,11 @@ public class WorkerServiceImpl implements IWorkerService {
         OrderEvents events=OrderEvents.builder().orderId(id).operatorType(2).operatorId(UserContext.getUserId()).createdAt(LocalDateTime.now())
                 .fromStatus(2).toStatus(3).remark(RemarkConstant.ORDER_COMPLETED).build();
         ordersMapper.insertOrderEvent(events);
+
+        Notifications n = Notifications.builder().notificationType(2).createdAt(LocalDateTime.now())
+                .receiverType(0).receiverId(order.getUserId()).relatedOrderId(id)
+                .title("服务已完成").content("您的订单" + order.getOrderNo() + "服务已完成，请确认验收").build();
+        rocketMQTemplate.syncSend(RocketMQConstant.NOTIFICATION_TOPIC, n);
     }
 
 

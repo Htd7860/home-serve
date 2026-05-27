@@ -1,9 +1,14 @@
 package com.qw.admin.dto;
 
+import com.qw.admin.validator.OnCreate;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /**
  * @Author：qw
@@ -18,6 +23,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class SeckilActivitiesRequest {
+    @NotEmpty
     String activityName;
-    String
+    @NotNull
+    Integer totalStock;
+    @NotNull
+    LocalDateTime startTime;
+    @NotNull
+    LocalDateTime endTime;
+    @NotNull
+    Long templateId;
+    @NotNull
+    Long categoryId;
 }
