@@ -1,5 +1,6 @@
 package com.qw.marketing.service.impl;
 
+import com.qw.common.constant.CouponStatus;
 import com.qw.common.exception.BizException;
 import com.qw.marketing.entity.CouponTemplates;
 import com.qw.marketing.entity.UserCoupons;
@@ -45,7 +46,7 @@ public class CouponServiceImpl implements ICouponService {
         UserCoupons userCoupons = UserCoupons.builder()
                 .userId(userId)
                 .templateId(templateId)
-                .status(0)
+                .status(CouponStatus.UNUSED.getCode())
                 .expireTime(LocalDateTime.now().plus(templates.getValidDays(), ChronoUnit.DAYS))
                 .createdAt(LocalDateTime.now())
                 .build();

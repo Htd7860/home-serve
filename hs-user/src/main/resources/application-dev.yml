@@ -17,3 +17,7 @@ rocketmq:
   name-server: localhost:9876
   producer:
     group: order-producer-group
+
+ws:
+  node:
+    id: 127.0.0.1:8080

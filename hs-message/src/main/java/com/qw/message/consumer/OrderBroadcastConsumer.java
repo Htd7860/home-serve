@@ -3,6 +3,7 @@ package com.qw.message.consumer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qw.common.constant.RedisConstant;
+import com.qw.common.dto.WsForwardMessage;
 import com.qw.common.exception.BizException;
 import com.qw.message.constant.RocketMQConstant;
 import com.qw.message.dto.OrderBroadcastMessage;
@@ -10,7 +11,9 @@ import com.qw.message.handler.OrderPushHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.geo.*;
 import org.springframework.data.geo.Point;
 import org.springframework.data.redis.connection.RedisGeoCommands;
@@ -36,6 +39,10 @@ public class OrderBroadcastConsumer implements RocketMQListener<OrderBroadcastMe
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private OrderPushHandler orderPushHandler;
+    @Value("${ws.node.id}")
+    private String nodeId;
+    @Autowired
+    RocketMQTemplate rocketMQTemplate;
 
     @Override
     public void onMessage(OrderBroadcastMessage orderBroadcastMessage) {
@@ -45,7 +52,15 @@ public class OrderBroadcastConsumer implements RocketMQListener<OrderBroadcastMe
       if(workIds==null){throw new BizException("查询失败");}
         try {
             String json=new ObjectMapper().writeValueAsString(orderBroadcastMessage);
-            orderPushHandler.broadcastToNearby(workIds,json);
+
+            for (Long workId : workIds) {
+                String targetNode = stringRedisTemplate.opsForValue().get("ws:node:worker:"+workId);
+                if(targetNode==null||targetNode.equals(nodeId)){
+                    orderPushHandler.pushToWorker(workId,json);
+                }else{
+                    rocketMQTemplate.syncSend(com.qw.common.constant.RocketMQConstant.WS_FORWARD_TOPIC_PREFIX+targetNode, WsForwardMessage.builder().workerId(workId).type(2).payload(json).build());
+                }
+            }
         } catch (JsonProcessingException e) {
             log.error("{}",e);
             throw new BizException("json解析失败");

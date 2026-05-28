@@ -1,6 +1,7 @@
 package com.qw.payment.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.qw.common.constant.WithdrawStatus;
 import com.qw.common.exception.BizException;
 import com.qw.common.utils.OrderNoUtils;
 import com.qw.payment.dto.WithdrawRequest;
@@ -63,7 +64,7 @@ public class WalletServiceImpl implements WalletService {
         }
 
         WorkerWithdraws workerWithdraws=WorkerWithdraws.builder().workerId(workerId).amount(request.getAmount())
-                .bankCardNo(request.getBankCardNo()).bankName(request.getBankName()).status(0).remark("提现记录").withdrawNo("WD:"+ OrderNoUtils.generateOrderNo()).build();
+                .bankCardNo(request.getBankCardNo()).bankName(request.getBankName()).status(WithdrawStatus.PROCESSING.getCode()).remark("提现记录").withdrawNo("WD:"+ OrderNoUtils.generateOrderNo()).build();
         paymentMapper.insertWithdraw(workerWithdraws);
     }
 

@@ -14,8 +14,26 @@ public class CacheConfig {
     public Cache<String, Object> categoriesCache() {
         return Caffeine.newBuilder()
                 .initialCapacity(20)
+                .maximumSize(250)
+                .expireAfterWrite(30, TimeUnit.MINUTES)
+                .build();
+    }
+
+    @Bean
+    public Cache<String, Object> skuCache() {
+        return Caffeine.newBuilder()
+                .initialCapacity(200)
+                .maximumSize(1000)
+                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .build();
+    }
+
+    @Bean
+    public Cache<String, Object> pricingCache() {
+        return Caffeine.newBuilder()
+                .initialCapacity(20)
                 .maximumSize(200)
-                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .expireAfterWrite(30, TimeUnit.MINUTES)
                 .build();
     }
 

@@ -6,6 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.qw.catalog.entity.ServiceSkus;
 import com.qw.catalog.service.ISkuService;
+import com.qw.common.constant.CouponStatus;
+import com.qw.common.constant.OrderStatus;
+import com.qw.common.constant.PayStatus;
+import com.qw.common.constant.PaymentRecordStatus;
+import com.qw.common.dto.OrderTimeOutMessage;
+import com.qw.common.dto.SettleMessage;
 import com.qw.common.entity.Notifications;
 import com.qw.common.entity.UserAddresses;
 import com.qw.common.exception.BizException;
@@ -38,6 +44,8 @@ import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,7 +107,7 @@ public class OrdersServiceImpl  implements IOrdersService {
         BigDecimal payInTruly=total;
         if(req.getCouponId()!=null){
             UserCoupons coupons = couponsMapper.getUserCouponsByid(req.getCouponId(), UserContext.getUserId());
-            if(coupons==null||coupons.getExpireTime().isBefore(LocalDateTime.now())||coupons.getStatus()!=0){
+            if(coupons==null||coupons.getExpireTime().isBefore(LocalDateTime.now())||coupons.getStatus()!=CouponStatus.UNUSED.getCode()){
                 throw new BizException(ErrorConstant.COUPONS_INVALIDED);
             }
 
@@ -128,7 +136,8 @@ public class OrdersServiceImpl  implements IOrdersService {
         Orders orders=Orders.builder().orderNo(orderNo).addressId(req.getAddressId()).createdAt(LocalDateTime.now())
                 .categoryId(categoryId).basePrice(serviceSkus.getBasePrice()).couponDiscount(total.subtract(payInTruly))
                 .finalPrice(payInTruly).distanceFee(dis).timeSurcharge(time).payMethod(1).userRemark(req.getUserRemark())
-                .skuId(req.getSkuId()).urgentFee(charge).userId(userid).appointmentTime(req.getAppointedTime()).payStatus(0).status(0).isUrgent(req.getIsUrgent()).build();
+                .skuId(req.getSkuId()).urgentFee(charge).userId(userid).appointmentTime(req.getAppointedTime())
+                .payStatus(PayStatus.UNPAID.getCode()).status(OrderStatus.WAITING.getCode()).isUrgent(req.getIsUrgent()).build();
 
         ordersMapper.insertOrders(orders);
         Long id =orders.getId();
@@ -143,9 +152,13 @@ public class OrdersServiceImpl  implements IOrdersService {
                 .orderId(id).build();
         ordersMapper.insertAddressSnapshots(snapshots);
         //记录状态变更
-        OrderEvents orderEvents=OrderEvents.builder().orderId(id).createdAt(LocalDateTime.now()).fromStatus(-1).toStatus(1)
-                .remark("").operatorType(3).build();
+        OrderEvents orderEvents=OrderEvents.builder().orderId(id).createdAt(LocalDateTime.now()).fromStatus(-1)
+                .toStatus(OrderStatus.WAITING.getCode()).remark("").operatorType(3).build();
             ordersMapper.insertOrderEvent(orderEvents);
+
+            rocketMQTemplate.syncSend(com.qw.common.constant.RocketMQConstant.ORDER_TIMEOUT_TOPIC+":"+ com.qw.common.constant.RocketMQConstant.ORDER_TIMEOUT_TAG,
+                    MessageBuilder.withPayload(OrderTimeOutMessage.builder().id(id).templateId(req.getCouponId())).build(),2000,16);
+
     }
 
     @Override
@@ -179,7 +192,7 @@ public class OrdersServiceImpl  implements IOrdersService {
             throw new BizException(ErrorConstant.ORDER_AUTH_ERROR);
         }
 
-        if(order.getStatus()==null||order.getStatus()!=0||order.getPayStatus()==null||order.getPayStatus()!=0){
+        if(order.getStatus()==null||order.getStatus()!=OrderStatus.WAITING.getCode()||order.getPayStatus()==null||order.getPayStatus()!=PayStatus.UNPAID.getCode()){
             throw new BizException(ErrorConstant.ORDER_STATUS_ERROR);
         }
         //todo 支付模块
@@ -192,14 +205,15 @@ public class OrdersServiceImpl  implements IOrdersService {
         rocketMQTemplate.syncSend(com.qw.common.constant.RocketMQConstant.NOTIFICATION_TOPIC,notifications);
 
 
-        order.setPayStatus(1);order.setPayTime(LocalDateTime.now());
+        order.setPayStatus(PayStatus.PAID.getCode());order.setPayTime(LocalDateTime.now());
         ordersMapper.updateOrders(order);
         PaymentRecords paymentRecords=PaymentRecords.builder().paymentNo("PAY:"+OrderNoUtils.generateOrderNo()).orderId(id).method(1)
-                .status(1).amount(order.getFinalPrice()).paidAt(LocalDateTime.now()).userId(UserContext.getUserId()).build();
+                .status(PaymentRecordStatus.SUCCESS.getCode()).amount(order.getFinalPrice()).paidAt(LocalDateTime.now()).userId(UserContext.getUserId()).build();
         paymentMapper.insertPaymentRecord(paymentRecords);
 
 
-        OrderEvents orderEvents=OrderEvents.builder().orderId(id).operatorType(3).fromStatus(0).toStatus(0)
+        OrderEvents orderEvents=OrderEvents.builder().orderId(id).operatorType(3)
+                .fromStatus(OrderStatus.WAITING.getCode()).toStatus(OrderStatus.WAITING.getCode())
                 .remark(OrderConstant.ORDER_PAY_SUCCESS).build();
         ordersMapper.insertOrderEvent(orderEvents);
 
@@ -222,44 +236,44 @@ public class OrdersServiceImpl  implements IOrdersService {
             throw new BizException(ErrorConstant.ORDER_AUTH_ERROR);
         }
 
-        if(order.getStatus()==null||!(order.getStatus()==0)){throw new BizException(ErrorConstant.ORDER_STATUS_ERROR);}
-        if(order.getPayStatus()!=null&&order.getPayStatus()==1){
+        if(order.getStatus()==null||!(order.getStatus()==OrderStatus.WAITING.getCode())){throw new BizException(ErrorConstant.ORDER_STATUS_ERROR);}
+        if(order.getPayStatus()!=null&&order.getPayStatus()==PayStatus.PAID.getCode()){
             //todo 退款逻辑
-           order.setPayStatus(3);
+           order.setPayStatus(PayStatus.REFUNDED.getCode());
         }
-        order.setStatus(5);order.setUpdatedAt(LocalDateTime.now());
+        order.setStatus(OrderStatus.CANCELLED.getCode());order.setUpdatedAt(LocalDateTime.now());
         ordersMapper.updateOrders(order);
 
-        OrderEvents orderEvents=OrderEvents.builder().orderId(id).operatorType(1).operatorId(UserContext.getUserId()).fromStatus(0).toStatus(5)
+        OrderEvents orderEvents=OrderEvents.builder().orderId(id).operatorType(1).operatorId(UserContext.getUserId())
+                .fromStatus(OrderStatus.WAITING.getCode()).toStatus(OrderStatus.CANCELLED.getCode())
                 .remark(OrderConstant.ORDER_CANCEL_SUCCESS).build();
         ordersMapper.insertOrderEvent(orderEvents);
     }
 
-    @Transactional
     @Override
     public void confirmOrder(Long id) {
         Orders order = ordersMapper.getOrderById(id);
         if(order==null||!order.getUserId().equals(UserContext.getUserId())){
             throw new BizException(ErrorConstant.ORDER_AUTH_ERROR);
         }
-        if(order.getStatus()==null||order.getStatus()!=3){
+        if(order.getStatus()==null||order.getStatus()!=OrderStatus.TO_CONFIRM.getCode()){
             throw new BizException(ErrorConstant.ORDER_STATUS_ERROR);
         }
 
-        order.setUpdatedAt(LocalDateTime.now());order.setConfirmTime(LocalDateTime.now());
-        order.setStatus(4);
-        ordersMapper.updateOrders(order);
+//        //分账操作
+//        walletService.settle(order.getWorkerId(),id,order.getFinalPrice());
+        SettleMessage settleMessage=SettleMessage.builder().userId(UserContext.getUserId()).orderId(id).finalPrice(order.getFinalPrice())
+                .workerId(order.getWorkerId()).build();
+        String json=null;
+        try {
+           json=new ObjectMapper().writeValueAsString(settleMessage);
+        } catch (JsonProcessingException e) {
+            log.error("json序列化失败");
+           throw new BizException("系统异常");
+        }
+        Message<String> message=MessageBuilder.withPayload(json).build();
+        rocketMQTemplate.sendMessageInTransaction("settle-topic:settle-tag",message,null);
 
-        OrderEvents orderEvents=OrderEvents.builder().orderId(id).operatorType(1).operatorId(UserContext.getUserId()).fromStatus(3).toStatus(4)
-                .remark(OrderConstant.ORDER_CONFIRM_SUCCESS).build();
-        ordersMapper.insertOrderEvent(orderEvents);
-
-        walletService.settle(order.getWorkerId(),id,order.getFinalPrice());
-
-        Notifications n = Notifications.builder().notificationType(2).createdAt(LocalDateTime.now())
-                .receiverType(1).receiverId(order.getWorkerId()).relatedOrderId(id)
-                .title("订单已验收").content("订单" + order.getOrderNo() + "已被用户确认验收").build();
-        rocketMQTemplate.syncSend(com.qw.common.constant.RocketMQConstant.NOTIFICATION_TOPIC, n);
     }
 
     @Transactional
@@ -267,11 +281,12 @@ public class OrdersServiceImpl  implements IOrdersService {
     public void refund(Long userId, Long id) {
         Orders order=ordersMapper.getOrderById(id);
         if(order==null||!(order.getUserId().equals(userId))){throw new BizException("没有操作权限");}
-        if(order.getStatus()==0&&order.getPayStatus()==1){
-            Orders newOrder=Orders.builder().status(7).id(id).payStatus(4).updatedAt(LocalDateTime.now()).build();
+        if(order.getStatus()==OrderStatus.WAITING.getCode()&&order.getPayStatus()==PayStatus.PAID.getCode()){
+            Orders newOrder=Orders.builder().status(OrderStatus.REFUNDED.getCode()).id(id)
+                    .payStatus(PayStatus.REFUNDED.getCode()).updatedAt(LocalDateTime.now()).build();
             ordersMapper.updateOrders(newOrder);
             OrderEvents events=OrderEvents.builder().orderId(id).operatorType(1).operatorId(userId).remark("用户退款")
-                    .fromStatus(order.getStatus()).toStatus(7).createdAt(LocalDateTime.now()).build();
+                    .fromStatus(order.getStatus()).toStatus(OrderStatus.REFUNDED.getCode()).createdAt(LocalDateTime.now()).build();
             ordersMapper.insertOrderEvent(events);
             return;
         }

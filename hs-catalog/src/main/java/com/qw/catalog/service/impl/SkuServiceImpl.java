@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,8 +40,10 @@ import java.util.List;
 public class SkuServiceImpl implements ISkuService {
     @Autowired
     SkuMapper skuMapper;
-    @Autowired
+    @Resource
     Cache<String,Object> skuCache;
+    @Resource
+    Cache<String,Object> pricingCache;
     @Autowired
     StringRedisTemplate stringRedisTemplate;
     @Autowired
@@ -124,7 +128,7 @@ public class SkuServiceImpl implements ISkuService {
 
     @Override
     public BigDecimal[] calculateMoney( LocalDateTime appointTime, BigDecimal baseMoney, boolean haveDis, Double distance) {
-        List<PricingRules> list= (List<PricingRules>) skuCache.get(CaffeineConstant.PRICING_RULE_KEY, key->{
+        List<PricingRules> list= (List<PricingRules>) pricingCache.get(CaffeineConstant.PRICING_RULE_KEY, key->{
                 String json = stringRedisTemplate.opsForValue().get(RedisConstant.PRICING_RULE_KEY);
                 List<PricingRules> rules=null;
                 if(json==null){return null;}
@@ -144,7 +148,7 @@ public class SkuServiceImpl implements ISkuService {
             } catch (JsonProcessingException e) {
                 log.error("{}",e);
             }
-            skuCache.put(CaffeineConstant.PRICING_RULE_KEY,list);
+            pricingCache.put(CaffeineConstant.PRICING_RULE_KEY,list);
         }
         if(list==null){return new BigDecimal[]{baseMoney,BigDecimal.ZERO,BigDecimal.ZERO};}
         BigDecimal[] res=new BigDecimal[3];

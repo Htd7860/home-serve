@@ -51,4 +51,7 @@ public interface CouponsMapper {
             "threshold_amount=#{thresholdAmount},discount_amount=#{discountAmount},discount_rate=#{discountRate}," +
             "valid_days=#{validDays},category_id=#{categoryId},type=#{type},status=#{status} where id=#{id}")
     int updateTemplate(CouponTemplates template);
+
+    @Update("update user_coupons set status =0 where templateId=#{id} ")
+    int backCouponsById(Long id);
 }

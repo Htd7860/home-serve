@@ -52,4 +52,7 @@ public interface PaymentMapper {
 
     @Select("select * from worker_withdraws where worker_id=#{workerId} order by created_at desc")
     List<WorkerWithdraws> getWithdrawsByWorkerId(Long workerId,Page page);
+
+    @Select("select count(*) from worker_earnings where order_id = #{orderId}")
+    int countEarningByOrderId(Long orderId);
 }

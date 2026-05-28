@@ -31,4 +31,7 @@ public interface NotificationMapper {
 
     @Select("select count(*) from notifications where receiver_type=#{type} and receiver_id=#{userId} and is_read=0")
     int countUnread(@Param("userId") Long userId, @Param("type") Integer type);
+
+    @Select("select count(*) from notifications where receiver_type=#{receiverType} and receiver_id=#{receiverId} and notification_type=#{notificationType} and related_order_id=#{relatedOrderId} and title=#{title}")
+    int countDuplicate(Notifications n);
 }

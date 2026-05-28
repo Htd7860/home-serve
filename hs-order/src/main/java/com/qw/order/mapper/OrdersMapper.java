@@ -30,11 +30,11 @@ public interface OrdersMapper{
 
     @Insert("insert into order_events (order_id, from_status, to_status, operator_type, operator_id,remark,created_at)" +
             "values(#{orderId},#{fromStatus},#{toStatus},#{operatorType},#{operatorId},#{remark},#{createdAt}) ")
-    void insertOrderEvent(OrderEvents orderEvents);
+    int insertOrderEvent(OrderEvents orderEvents);
 
     @Insert("insert into order_address_snapshots (order_id, contact_name, contact_phone, full_address, lng, lat) " +
             "values (#{orderId},#{contactName},#{contactPhone},#{fullAddress},#{lng},#{lat})")
-    void insertAddressSnapshots(OrderAddressSnapshots snapshots);
+    int insertAddressSnapshots(OrderAddressSnapshots snapshots);
 
 
     List<Orders> getMyOrders(@Param("status") Integer status, @Param("userId") Long userId, Page<Orders> pages);
@@ -45,7 +45,7 @@ public interface OrdersMapper{
     @Select("select * from order_events where order_id=#{id}")
     List<OrderEvents> getOrderEventByOrderId(Long id);
 
-    void updateOrders(Orders orders);
+    int updateOrders(Orders orders);
 
     @Select("select * from orders where worker_id=#{id} order by created_at desc")
     List<Orders> getOrdersByWorkerId(Long id);

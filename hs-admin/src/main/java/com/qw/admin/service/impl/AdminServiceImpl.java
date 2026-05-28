@@ -15,6 +15,7 @@ import com.qw.catalog.entity.PricingRules;
 import com.qw.catalog.mapper.CategoriesMapper;
 import com.qw.catalog.mapper.PricingRuleMapper;
 import com.qw.catalog.mapper.SkuMapper;
+import com.qw.common.constant.SeckillActivityStatus;
 import com.qw.common.entity.Workers;
 import com.qw.common.exception.BizException;
 import com.qw.common.mapper.WorkersMapper;
@@ -162,13 +163,13 @@ public class AdminServiceImpl implements IAdminService {
         if(activities==null){throw new BizException("活动不存在");}
         int status=activities.getStatus();
         String stockKey= com.qw.marketing.constant.RedisConstant.SECKILL_STOCK_PREFIX+id;
-        if(status==0){
+        if(status==SeckillActivityStatus.DRAFT.getCode()){
             if(req.getStartTime().minusMinutes(10).isBefore(LocalDateTime.now())){
                 throw new BizException("时间修改失败");
             }
             BeanUtils.copyProperties(req,activities);
             activities.setPreheatTime(req.getStartTime().minusMinutes(10));
-        }else if(status==1){
+        }else if(status==SeckillActivityStatus.PREHEAT.getCode()){
             activities.setTotalStock(req.getTotalStock());
             activities.setEndTime(req.getEndTime());
             String old=stringRedisTemplate.opsForValue().get(stockKey);
@@ -177,9 +178,9 @@ public class AdminServiceImpl implements IAdminService {
                 Long dis=Long.valueOf(req.getTotalStock())-stock;
                 stringRedisTemplate.opsForValue().increment(stockKey,dis);
             }
-        }else if(status==2){
+        }else if(status==SeckillActivityStatus.IN_PROGRESS.getCode()){
             activities.setEndTime(req.getEndTime());
-        }else if(status==3){
+        }else if(status==SeckillActivityStatus.ENDED.getCode()){
             throw new BizException("不可修改");
         }else{
             throw new BizException("状态错误");
@@ -275,7 +276,7 @@ public class AdminServiceImpl implements IAdminService {
     public void deleteActivity(Long id) {
         SeckillActivities activities=seckillMapper.getById(id);
         if(activities==null){throw new BizException("活动不存在");}
-        if(activities.getStatus()!=0){throw new BizException("活动无法删除");}
+        if(activities.getStatus()!=SeckillActivityStatus.DRAFT.getCode()){throw new BizException("活动无法删除");}
         int rows = seckillMapper.delete(id);
         if(rows==0){
             throw new BizException("删除失败");

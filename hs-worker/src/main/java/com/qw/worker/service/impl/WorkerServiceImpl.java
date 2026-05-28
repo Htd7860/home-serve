@@ -1,5 +1,6 @@
 package com.qw.worker.service.impl;
 
+import com.qw.common.constant.OrderStatus;
 import com.qw.common.constant.RocketMQConstant;
 import com.qw.common.entity.Notifications;
 import com.qw.common.entity.Workers;
@@ -85,10 +86,10 @@ public class WorkerServiceImpl implements IWorkerService {
         if(res==-1){throw new BizException(ErrorConstant.ORDER_NOT_EXISTS);}
         if(res==0){throw new BizException(ErrorConstant.ORDER_HAVE_BE_GRAB);}
         if(res==1){
-            Orders orders=Orders.builder().id(orderId).status(1).workerId(workerId).updatedAt(LocalDateTime.now()).build();
+            Orders orders=Orders.builder().id(orderId).status(OrderStatus.GRABBED.getCode()).workerId(workerId).updatedAt(LocalDateTime.now()).build();
             ordersMapper.updateOrders(orders);
 
-            OrderEvents events=OrderEvents.builder().orderId(orderId).fromStatus(0).toStatus(1).createdAt(LocalDateTime.now())
+            OrderEvents events=OrderEvents.builder().orderId(orderId).fromStatus(OrderStatus.WAITING.getCode()).toStatus(OrderStatus.GRABBED.getCode()).createdAt(LocalDateTime.now())
                     .operatorType(2).operatorId(workerId).remark(RemarkConstant.ORDER_HAVE_BE_GRAB).build();
             ordersMapper.insertOrderEvent(events);
             stringRedisTemplate.delete(RedisConstant.ORDER_GRAB_PREFIX+orderId);
@@ -113,12 +114,12 @@ public class WorkerServiceImpl implements IWorkerService {
         if(!order.getWorkerId().equals(UserContext.getUserId())){
             throw new BizException(ErrorConstant.AUTH_NOT_ENOUGH);
         }
-        if(order.getStatus()==null||order.getStatus()!=1){throw new BizException(ErrorConstant.STATUS_ERROR);}
-        Orders orders=Orders.builder().id(order.getId()).status(2).updatedAt(LocalDateTime.now()).build();
+        if(order.getStatus()==null||order.getStatus()!=OrderStatus.GRABBED.getCode()){throw new BizException(ErrorConstant.STATUS_ERROR);}
+        Orders orders=Orders.builder().id(order.getId()).status(OrderStatus.SERVING.getCode()).updatedAt(LocalDateTime.now()).build();
         ordersMapper.updateOrders(orders);
 
         OrderEvents events=OrderEvents.builder().orderId(id).operatorType(2).operatorId(UserContext.getUserId()).createdAt(LocalDateTime.now())
-                .fromStatus(1).toStatus(2).remark(RemarkConstant.ORDER_START).build();
+                .fromStatus(OrderStatus.GRABBED.getCode()).toStatus(OrderStatus.SERVING.getCode()).remark(RemarkConstant.ORDER_START).build();
         ordersMapper.insertOrderEvent(events);
 
     }
@@ -130,12 +131,12 @@ public class WorkerServiceImpl implements IWorkerService {
         if(!order.getWorkerId().equals(UserContext.getUserId())){
             throw new BizException(ErrorConstant.AUTH_NOT_ENOUGH);
         }
-        if(order.getStatus()==null||order.getStatus()!=2){throw new BizException(ErrorConstant.STATUS_ERROR);}
-        Orders orders=Orders.builder().id(order.getId()).status(3).updatedAt(LocalDateTime.now()).build();
+        if(order.getStatus()==null||order.getStatus()!=OrderStatus.SERVING.getCode()){throw new BizException(ErrorConstant.STATUS_ERROR);}
+        Orders orders=Orders.builder().id(order.getId()).status(OrderStatus.TO_CONFIRM.getCode()).updatedAt(LocalDateTime.now()).build();
         ordersMapper.updateOrders(orders);
 
         OrderEvents events=OrderEvents.builder().orderId(id).operatorType(2).operatorId(UserContext.getUserId()).createdAt(LocalDateTime.now())
-                .fromStatus(2).toStatus(3).remark(RemarkConstant.ORDER_COMPLETED).build();
+                .fromStatus(OrderStatus.SERVING.getCode()).toStatus(OrderStatus.TO_CONFIRM.getCode()).remark(RemarkConstant.ORDER_COMPLETED).build();
         ordersMapper.insertOrderEvent(events);
 
         Notifications n = Notifications.builder().notificationType(2).createdAt(LocalDateTime.now())

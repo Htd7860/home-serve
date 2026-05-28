@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.RateLimiter;
+import com.qw.common.constant.SeckillActivityStatus;
 import com.qw.common.exception.BizException;
 import com.qw.common.utils.UserContext;
 import com.qw.marketing.constant.RedisConstant;
@@ -14,6 +15,8 @@ import com.qw.marketing.mapper.SeckillMapper;
 import com.qw.marketing.service.ISeckillService;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -85,7 +88,7 @@ public class SeckillServiceImpl implements ISeckillService {
         if(activities==null){
             throw new BizException("活动不存在");
         }
-        if(activities.getStatus()!=2){
+        if(activities.getStatus()!=SeckillActivityStatus.IN_PROGRESS.getCode()){
             throw new BizException("活动未开始或者已结束");
         }
         LocalDateTime now=LocalDateTime.now();
@@ -101,7 +104,18 @@ public class SeckillServiceImpl implements ISeckillService {
         if(res==1){
             SeckillGrabMessage message=SeckillGrabMessage.builder().userId(UserContext.getUserId())
                     .activityId(activityId).templateId(activities.getTemplateId()).build();
-            rocketMQTemplate.syncSend(RocketMQConstant.SECKILL_TOPIC+":"+RocketMQConstant.SECKILL_GRAB_TAG,message);
+            rocketMQTemplate.asyncSend(RocketMQConstant.SECKILL_TOPIC + ":" + RocketMQConstant.SECKILL_GRAB_TAG, message,
+                    new SendCallback() {
+                        @Override
+                        public void onSuccess(SendResult sendResult) {
+                        }
+                        @Override
+                        public void onException(Throwable throwable) {
+                            log.error("秒杀失败,回滚库存{}",throwable);
+                            stringRedisTemplate.opsForValue().increment(stockKey);
+                            stringRedisTemplate.opsForSet().remove(userKey,UserContext.getUserId().toString());
+                        }
+                    });
             return activities.getTemplateId();
         }
         throw new BizException("抢券失败");

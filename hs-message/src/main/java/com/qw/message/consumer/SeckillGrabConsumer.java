@@ -1,5 +1,6 @@
 package com.qw.message.consumer;
 
+import com.qw.common.constant.CouponStatus;
 import com.qw.common.constant.RocketMQConstant;
 import com.qw.marketing.dto.SeckillGrabMessage;
 import com.qw.marketing.entity.CouponTemplates;
@@ -33,9 +34,17 @@ public class SeckillGrabConsumer implements RocketMQListener<SeckillGrabMessage>
     @Override
     public void onMessage(SeckillGrabMessage seckillGrabMessage) {
         Long templateId=seckillGrabMessage.getTemplateId();
+        Long id=seckillGrabMessage.getUserId();
+        UserCoupons coupons = couponsMapper.getByUserAndTemplate(id, templateId);
+        if(coupons!=null){return;}
         CouponTemplates templates = couponsMapper.getTemplatesById(templateId);
-        UserCoupons userCoupons=UserCoupons.builder().userId(seckillGrabMessage.getUserId()).status(0).expireTime(LocalDateTime.now().plus(templates.getValidDays(), ChronoUnit.DAYS)).createdAt(LocalDateTime.now()).templateId(templateId).build();
-        couponsMapper.receiveCoupon(userCoupons);
-        couponsMapper.addCouponsRecord(templateId);
+        UserCoupons userCoupons=UserCoupons.builder().userId(seckillGrabMessage.getUserId()).status(CouponStatus.UNUSED.getCode()).expireTime(LocalDateTime.now().plus(templates.getValidDays(), ChronoUnit.DAYS)).createdAt(LocalDateTime.now()).templateId(templateId).build();
+        try {
+            couponsMapper.receiveCoupon(userCoupons);
+            couponsMapper.addCouponsRecord(templateId);
+        } catch (Exception e) {
+            log.error("{}",e);
+            throw e;
+        }
     }
 }
