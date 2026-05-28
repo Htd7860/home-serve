@@ -10,7 +10,7 @@ import com.qw.admin.validator.OnCreate;
 import com.qw.admin.validator.OnUpdate;
 import com.qw.catalog.service.ICategoriesService;
 import com.qw.common.result.Result;
-import com.qw.user.annotation.RequireRole;
+import com.qw.common.annotation.RequireRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

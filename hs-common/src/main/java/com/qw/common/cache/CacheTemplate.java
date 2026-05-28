@@ -27,17 +27,15 @@ public class CacheTemplate {
 
     ObjectMapper objectMapper;
     StringRedisTemplate stringRedisTemplate;
-    Cache<String,Object> cache;
 
-    public CacheTemplate(ObjectMapper objectMapper,StringRedisTemplate stringRedisTemplate,Cache<String,Object> cache){
-        this.cache=cache;
+    public CacheTemplate(ObjectMapper objectMapper,StringRedisTemplate stringRedisTemplate){
         this.objectMapper=objectMapper;
         this.stringRedisTemplate=stringRedisTemplate;
     }
 
     @SuppressWarnings("unchecked")
-    public <T,O> T get(String cacheKey,O dbKey,Class<T> clazz, Function<O,T> function){
-      T res= (T)cache.getIfPresent(cacheKey);
+    public <T,O> T get(String cacheKey,O dbKey,Class<T> clazz, Function<O,T> function,Cache<String,Object> cache){
+        T res= (T)cache.getIfPresent(cacheKey);
 
       if(res==null){
           String json = stringRedisTemplate.opsForValue().get(cacheKey);
@@ -74,13 +72,9 @@ public class CacheTemplate {
       return res;
     }
 
-    public void clear(String cacheKey){
-        cache.invalidate(cacheKey);
-        stringRedisTemplate.delete(cacheKey);
-    }
 
     @SuppressWarnings("unchecked")
-    public <T,O> List<T> getList(String cacheKey, O dbKey, Class<T> clazz, Function<O,List<T>> function){
+    public <T,O> List<T> getList(String cacheKey, O dbKey, Class<T> clazz, Function<O,List<T>> function,Cache<String,Object> cache){
         List<T> res= (List<T>) cache.getIfPresent(cacheKey);
 
         if(res==null){

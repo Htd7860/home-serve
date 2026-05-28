@@ -1,10 +1,10 @@
 package com.qw.payment.controller;
 
+import com.qw.common.annotation.RequireRole;
 import com.qw.common.result.Result;
 import com.qw.common.utils.UserContext;
 import com.qw.payment.dto.WithdrawRequest;
 import com.qw.payment.service.WalletService;
-import com.qw.user.annotation.RequireRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

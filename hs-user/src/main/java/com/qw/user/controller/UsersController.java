@@ -4,7 +4,7 @@ import com.qw.common.dto.AddressRequest;
 import com.qw.common.service.IUserService;
 import com.qw.common.result.Result;
 import com.qw.common.utils.UserContext;
-import com.qw.user.annotation.RequireRole;
+import com.qw.common.annotation.RequireRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

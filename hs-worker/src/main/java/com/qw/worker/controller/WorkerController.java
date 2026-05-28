@@ -1,7 +1,7 @@
 package com.qw.worker.controller;
 
+import com.qw.common.annotation.RequireRole;
 import com.qw.common.result.Result;
-import com.qw.user.annotation.RequireRole;
 import com.qw.worker.dto.LocationRequest;
 import com.qw.worker.service.IWorkerService;
 import io.swagger.v3.oas.annotations.Operation;

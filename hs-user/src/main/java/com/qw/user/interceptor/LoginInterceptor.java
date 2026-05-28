@@ -1,6 +1,6 @@
 package com.qw.user.interceptor;
 
-import com.qw.user.annotation.RequireRole;
+import com.qw.common.annotation.RequireRole;
 import com.qw.common.utils.JwtUtils;
 import com.qw.common.utils.UserContext;
 import io.jsonwebtoken.Claims;

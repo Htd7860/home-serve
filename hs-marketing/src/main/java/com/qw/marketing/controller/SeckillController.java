@@ -1,10 +1,10 @@
 package com.qw.marketing.controller;
 
+import com.qw.common.annotation.RequireRole;
 import com.qw.common.result.Result;
 import com.qw.common.utils.UserContext;
 import com.qw.marketing.constant.RedisConstant;
 import com.qw.marketing.service.ISeckillService;
-import com.qw.user.annotation.RequireRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

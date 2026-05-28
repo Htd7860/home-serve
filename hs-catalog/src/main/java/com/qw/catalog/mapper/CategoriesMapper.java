@@ -25,10 +25,13 @@ public interface CategoriesMapper {
     ServiceCategories getById(Long id);
 
 
-    void insertWithOne(ServiceCategories categories);
+    int insertWithOne(ServiceCategories categories);
 
     int updateCategoryById(ServiceCategories categories);
 
     @Delete("delete from service_categories where id=#{id}")
     int deleteById(Integer id);
+
+    @Select("select id from service_categories")
+    List<Long> getAllIds();
 }

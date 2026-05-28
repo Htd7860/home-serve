@@ -1,4 +1,4 @@
-package com.qw.user.annotation;
+package com.qw.common.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

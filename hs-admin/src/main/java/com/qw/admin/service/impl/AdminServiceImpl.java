@@ -7,7 +7,6 @@ import com.qw.admin.dto.SeckilActivitiesRequest;
 import com.qw.admin.dto.ServiceCategoryRequest;
 import com.qw.admin.dto.SkuServiceRequest;
 import com.qw.admin.service.IAdminService;
-import com.qw.catalog.constant.CaffeineConstant;
 import com.qw.catalog.constant.RedisConstant;
 import com.qw.catalog.entity.ServiceCategories;
 import com.qw.catalog.entity.ServiceSkus;
@@ -23,10 +22,13 @@ import com.qw.marketing.entity.CouponTemplates;
 import com.qw.marketing.entity.SeckillActivities;
 import com.qw.marketing.mapper.CouponsMapper;
 import com.qw.marketing.mapper.SeckillMapper;
+import jakarta.annotation.Resource;
+import org.redisson.api.RBloomFilter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,8 +48,12 @@ public class AdminServiceImpl implements IAdminService {
     CategoriesMapper categoriesMapper;
     @Autowired
     StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    Cache<String,Object> cache;
+    @Resource
+    Cache<String,Object> categoriesCache;
+    @Resource
+    Cache<String,Object> skuCache;
+    @Resource
+    Cache<String,Object> pricingCache;
     @Autowired
     SkuMapper skuMapper;
     @Autowired
@@ -58,13 +64,21 @@ public class AdminServiceImpl implements IAdminService {
     CouponsMapper couponsMapper;
     @Autowired
     PricingRuleMapper pricingRuleMapper;
+    @Resource
+    RBloomFilter skuBloomFilter;
+    @Resource
+    RBloomFilter categoryBloomFilter;
+
+    @Transactional
     @Override
     public void insertWithOne(ServiceCategoryRequest req) {
         ServiceCategories categories=new ServiceCategories();
         BeanUtils.copyProperties(req,categories);
-        categoriesMapper.insertWithOne(categories);
+        int rows = categoriesMapper.insertWithOne(categories);
+        if(rows==0){throw new BizException("插入失败");}
+        categoryBloomFilter.add(categories.getId());
         stringRedisTemplate.delete(RedisConstant.ALL_CATEGORIES);
-        cache.invalidate(CaffeineConstant.ALL_CATEGORIES);
+        categoriesCache.invalidate(RedisConstant.ALL_CATEGORIES);
     }
 
     @Override
@@ -76,8 +90,8 @@ public class AdminServiceImpl implements IAdminService {
         if(rows==0){throw new BizException("该分类不存在");}
         stringRedisTemplate.delete(RedisConstant.CATEGORIES_PREFIX+id);
         stringRedisTemplate.delete(RedisConstant.ALL_CATEGORIES);
-        cache.invalidate(CaffeineConstant.ALL_CATEGORIES);
-        cache.invalidate(CaffeineConstant.CATEGORY_PREFIX+id);
+        categoriesCache.invalidate(RedisConstant.ALL_CATEGORIES);
+        categoriesCache.invalidate(RedisConstant.CATEGORIES_PREFIX+id);
     }
 
     @Override
@@ -92,10 +106,12 @@ public class AdminServiceImpl implements IAdminService {
         }
         stringRedisTemplate.delete(RedisConstant.CATEGORIES_PREFIX+id);
         stringRedisTemplate.delete(RedisConstant.ALL_CATEGORIES);
-        cache.invalidate(CaffeineConstant.ALL_CATEGORIES);
-        cache.invalidate(CaffeineConstant.CATEGORY_PREFIX+id);
+        categoriesCache.invalidate(RedisConstant.ALL_CATEGORIES);
+        categoriesCache.invalidate(RedisConstant.CATEGORIES_PREFIX+id);
+
     }
 
+    @Transactional
     @Override
     public void addSku(SkuServiceRequest req) {
         ServiceSkus sku=new ServiceSkus();
@@ -107,8 +123,9 @@ public class AdminServiceImpl implements IAdminService {
             rows=skuMapper.insertWithImg(sku);
         }
         if(rows==0){throw new BizException("插入失败");}
+        skuBloomFilter.add(sku.getId());
         stringRedisTemplate.delete(RedisConstant.SKUS_PREFIX+req.getCategoryId());
-        cache.invalidate(CaffeineConstant.SKUS_PREFIX+req.getCategoryId());
+        skuCache.invalidate(RedisConstant.SKUS_PREFIX+req.getCategoryId());
     }
 
     @Override
@@ -121,9 +138,9 @@ public class AdminServiceImpl implements IAdminService {
             throw new BizException("修改失败");
         }
         stringRedisTemplate.delete(RedisConstant.SKUS_PREFIX+req.getCategoryId());
-        cache.invalidate(CaffeineConstant.SKUS_PREFIX+req.getCategoryId());
+        skuCache.invalidate(RedisConstant.SKUS_PREFIX+req.getCategoryId());
         stringRedisTemplate.delete(RedisConstant.SKUS_SINGLE_PREFIX+id);
-        cache.invalidate(CaffeineConstant.SKUS_SINGLE_PREFIX+id);
+        skuCache.invalidate(RedisConstant.SKUS_SINGLE_PREFIX+id);
     }
 
     @Override
@@ -241,7 +258,7 @@ public class AdminServiceImpl implements IAdminService {
         if (rows == 0) {
             throw new BizException("创建失败");
         }
-        cache.invalidate(com.qw.catalog.constant.CaffeineConstant.PRICING_RULE_KEY);
+        pricingCache.invalidate(com.qw.catalog.constant.RedisConstant.PRICING_RULE_KEY);
         stringRedisTemplate.delete(com.qw.catalog.constant.RedisConstant.PRICING_RULE_KEY);
     }
 
@@ -258,7 +275,7 @@ public class AdminServiceImpl implements IAdminService {
         if (rows == 0) {
             throw new BizException("修改失败");
         }
-        cache.invalidate(com.qw.catalog.constant.CaffeineConstant.PRICING_RULE_KEY);
+        pricingCache.invalidate(com.qw.catalog.constant.RedisConstant.PRICING_RULE_KEY);
         stringRedisTemplate.delete(com.qw.catalog.constant.RedisConstant.PRICING_RULE_KEY);
     }
 
@@ -268,7 +285,7 @@ public class AdminServiceImpl implements IAdminService {
         if (rows == 0) {
             throw new BizException("删除失败");
         }
-        cache.invalidate(com.qw.catalog.constant.CaffeineConstant.PRICING_RULE_KEY);
+        pricingCache.invalidate(com.qw.catalog.constant.RedisConstant.PRICING_RULE_KEY);
         stringRedisTemplate.delete(com.qw.catalog.constant.RedisConstant.PRICING_RULE_KEY);
     }
 

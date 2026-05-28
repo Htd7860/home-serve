@@ -3,6 +3,7 @@ package com.qw.catalog.mapper;
 import com.qw.catalog.entity.ServiceSkus;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -25,10 +26,16 @@ public interface SkuMapper {
 
     @Insert("insert into service_skus (category_id, name, description, cover_image, base_price, duration_minutes, unit, sales_count, status, created_at, updated_at) " +
             "values (#{categoryId},#{name},#{description},#{coverImage},#{basePrice},#{durationMinutes},#{unit},#{salesCount},#{status},now(),now()) ")
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     int insertWithImg(ServiceSkus sku);
+
     @Insert("insert into service_skus (category_id, name, description, base_price, duration_minutes, unit, sales_count, status, created_at, updated_at) " +
             "values (#{categoryId},#{name},#{description},#{basePrice},#{durationMinutes},#{unit},#{salesCount},#{status},now(),now()) ")
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     int insertWithNoImg(ServiceSkus sku);
 
     int updateSku(ServiceSkus sku);
+
+    @Select("select id from service_skus")
+    List<Long> getAllIds();
 }
