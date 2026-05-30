@@ -20,7 +20,7 @@ logs/
 
 # 敏感配置
 *.env
-application-local.yml
+application-*.yml
 
 # 临时文件
 *.tmp

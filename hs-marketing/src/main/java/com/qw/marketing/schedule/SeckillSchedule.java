@@ -33,7 +33,7 @@ public class SeckillSchedule {
     @Autowired
     RedissonClient redissonClient;
 
-    @Scheduled(cron = "0 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void preheat(){
         RLock rLock=redissonClient.getLock("lock:seckill:preheat");
         if(!rLock.tryLock()){return;}
@@ -57,7 +57,7 @@ public class SeckillSchedule {
         }
     }
 
-    @Scheduled(cron = "0 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void start(){
         RLock lock=redissonClient.getLock("lock:seckill:start");
         if(!lock.tryLock()){return;}
@@ -74,7 +74,7 @@ public class SeckillSchedule {
         }
     }
 
-    @Scheduled(cron = "0 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void end(){
         RLock lock=redissonClient.getLock("lock:seckill:end");
         if(!lock.tryLock()){return;}

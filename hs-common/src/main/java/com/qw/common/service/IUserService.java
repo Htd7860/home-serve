@@ -2,6 +2,7 @@ package com.qw.common.service;
 
 import com.qw.common.dto.AddressRequest;
 import com.qw.common.entity.UserAddresses;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,4 +27,6 @@ public interface IUserService {
     void deleteById(Long id);
 
     void changeDefaultAddress(Long id);
+
+    String uploadAvatar(MultipartFile file);
 }

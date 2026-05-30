@@ -55,7 +55,8 @@ public class AdminController {
     @PostMapping("/upload")
     @Operation(summary = "上传图片")
     public Result uploadImage(@RequestParam("file") MultipartFile file){
-        return Result.ok();
+
+        return Result.ok(adminServiceImpl.uploadImg(file));
     }
 
     @RequireRole({"3"})

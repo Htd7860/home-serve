@@ -70,8 +70,6 @@ public class OrdersServiceImpl  implements IOrdersService {
     @Autowired
     IUserService userServiceImpl;
     @Autowired
-    Cache<String,Object> ordersCache;
-    @Autowired
     CouponsMapper couponsMapper;
     @Autowired
     OrdersMapper ordersMapper;
@@ -123,6 +121,8 @@ public class OrdersServiceImpl  implements IOrdersService {
             }
 
         }
+        if(req.getUserRemark()==null){req.setUserRemark("");}
+        if(req.getIsUrgent()==null){req.setIsUrgent(0);}
         BigDecimal charge=BigDecimal.ZERO;
         if(req.getIsUrgent()==1){
             charge = total.multiply(BigDecimal.valueOf(0.2));
@@ -131,8 +131,6 @@ public class OrdersServiceImpl  implements IOrdersService {
         }
 
         String orderNo= OrderNoUtils.generateOrderNo();
-        if(req.getUserRemark()==null){req.setUserRemark("");}
-        if(req.getIsUrgent()==null){req.setIsUrgent(0);}
         Orders orders=Orders.builder().orderNo(orderNo).addressId(req.getAddressId()).createdAt(LocalDateTime.now())
                 .categoryId(categoryId).basePrice(serviceSkus.getBasePrice()).couponDiscount(total.subtract(payInTruly))
                 .finalPrice(payInTruly).distanceFee(dis).timeSurcharge(time).payMethod(1).userRemark(req.getUserRemark())
@@ -263,7 +261,7 @@ public class OrdersServiceImpl  implements IOrdersService {
 //        //分账操作
 //        walletService.settle(order.getWorkerId(),id,order.getFinalPrice());
         SettleMessage settleMessage=SettleMessage.builder().userId(UserContext.getUserId()).orderId(id).finalPrice(order.getFinalPrice())
-                .workerId(order.getWorkerId()).build();
+                .distanceFee(order.getDistanceFee()).workerId(order.getWorkerId()).build();
         String json=null;
         try {
            json=new ObjectMapper().writeValueAsString(settleMessage);

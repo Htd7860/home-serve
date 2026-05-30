@@ -26,5 +26,5 @@ public interface WalletService {
 
     List<WorkerWithdraws> getWithdraws(Long userId,int page,int size);
 
-    void settle(Long workerId, Long orderId, BigDecimal finalPrice);
+    void settle(Long workerId, Long orderId, BigDecimal finalPrice, BigDecimal distanceFee);
 }

@@ -9,6 +9,7 @@ import com.qw.catalog.entity.PricingRules;
 import com.qw.common.entity.Workers;
 import com.qw.marketing.entity.CouponTemplates;
 import com.qw.marketing.entity.SeckillActivities;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -58,4 +59,6 @@ public interface IAdminService {
     void updatePricingRule(Integer id, PricingRuleRequest req);
 
     void deletePricingRule(Integer id);
+
+    String uploadImg(MultipartFile file);
 }

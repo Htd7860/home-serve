@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Author：qw
@@ -69,5 +70,12 @@ public class WorkerController {
     public Result endService(@PathVariable Long id){
         workerServiceImpl.completeService(id);
         return Result.ok();
+    }
+
+    @RequireRole({"2"})
+    @Operation(summary = "上传头像")
+    @PutMapping("/avatar")
+    public Result uploadAvatar(@RequestParam MultipartFile file) {
+        return Result.ok(workerServiceImpl.uploadAvatar(file));
     }
 }

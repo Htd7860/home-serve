@@ -16,5 +16,6 @@ public class SettleMessage implements Serializable {
     private Long orderId;
     private Long workerId;
     private BigDecimal finalPrice;
+    private BigDecimal distanceFee;
     private Long userId;
 }

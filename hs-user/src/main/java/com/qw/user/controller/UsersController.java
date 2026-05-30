@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -73,5 +74,12 @@ public class UsersController {
     public Result changeDefaultAddress(@PathVariable Long id){
         userServiceImpl.changeDefaultAddress(id);
         return Result.ok();
+    }
+
+    @RequireRole({"1"})
+    @Operation(summary = "上传头像")
+    @PostMapping("/me/avatar")
+    public Result uploadAvatar(@RequestParam MultipartFile file) {
+        return Result.ok(userServiceImpl.uploadAvatar(file));
     }
 }

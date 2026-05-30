@@ -46,4 +46,7 @@ public interface WorkersMapper {
 
     @Update("update workers set status=2 where id=#{id}")
     int rejectById(Long id);
+
+    @Update("update workers set avatar_url = #{avatarUrl} where id = #{id}")
+    int updateAvatar(Long id, String avatarUrl);
 }

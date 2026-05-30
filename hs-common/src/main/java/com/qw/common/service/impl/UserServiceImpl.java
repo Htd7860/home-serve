@@ -2,12 +2,15 @@ package com.qw.common.service.impl;
 
 import com.qw.common.dto.AddressRequest;
 import com.qw.common.mapper.UserAddressesMapper;
+import com.qw.common.mapper.UsersMapper;
 import com.qw.common.entity.UserAddresses;
+import com.qw.common.service.FileService;
 import com.qw.common.service.IUserService;
 import com.qw.common.utils.UserContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +27,10 @@ import java.util.List;
 public class UserServiceImpl implements IUserService {
     @Autowired
     UserAddressesMapper userAddressesMapper;
+    @Autowired
+    UsersMapper usersMapper;
+    @Autowired
+    FileService fileService;
     @Override
     public List<UserAddresses> getAddressByUserId(Long id) {
         return userAddressesMapper.getAddressByUserId(id);
@@ -66,5 +73,12 @@ public class UserServiceImpl implements IUserService {
     public void changeDefaultAddress(Long id) {
         userAddressesMapper.restoreDefaultStatus(UserContext.getUserId());
         userAddressesMapper.changeDefaultAddress(id,UserContext.getUserId());
+    }
+
+    @Override
+    public String uploadAvatar(MultipartFile file) {
+        String url = fileService.upload(file);
+        usersMapper.updateAvatar(UserContext.getUserId(), url);
+        return url;
     }
 }

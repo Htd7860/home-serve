@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * 启动类
  */
 @SpringBootApplication(scanBasePackages = "com.qw")
-@MapperScan("com.qw")
+@MapperScan({"com.qw.*.mapper", "com.qw.common.mapper"})
 @EnableScheduling
 public class HsUserApplication {
     public static void main(String[] args) {

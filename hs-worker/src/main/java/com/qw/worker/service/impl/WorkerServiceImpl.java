@@ -1,12 +1,16 @@
 package com.qw.worker.service.impl;
 
+import com.qw.catalog.service.ISkuService;
 import com.qw.common.constant.OrderStatus;
 import com.qw.common.constant.RocketMQConstant;
 import com.qw.common.entity.Notifications;
 import com.qw.common.entity.Workers;
 import com.qw.common.exception.BizException;
 import com.qw.common.mapper.WorkersMapper;
+import com.qw.common.service.FileService;
 import com.qw.common.utils.UserContext;
+import org.springframework.web.multipart.MultipartFile;
+import com.qw.order.entity.OrderAddressSnapshots;
 import com.qw.order.entity.OrderEvents;
 import com.qw.order.entity.Orders;
 import com.qw.order.mapper.OrdersMapper;
@@ -16,6 +20,7 @@ import com.qw.worker.constant.RemarkConstant;
 import com.qw.worker.dto.LocationRequest;
 import com.qw.worker.service.IWorkerService;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -25,6 +30,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -49,6 +55,10 @@ public class WorkerServiceImpl implements IWorkerService {
     OrdersMapper ordersMapper;
     @Autowired
     RocketMQTemplate rocketMQTemplate;
+    @Resource(name = "skuServiceImpl")
+    ISkuService skuService;
+    @Autowired
+    FileService fileService;
 
     @PostConstruct
     private void init(){
@@ -82,18 +92,34 @@ public class WorkerServiceImpl implements IWorkerService {
     @Override
     public Long grabOrder(Long orderId) {
         Long workerId=UserContext.getUserId();
-        Long res = stringRedisTemplate.execute(script, Collections.singletonList(RedisConstant.ORDER_GRAB_PREFIX + orderId), workerId.toString());
+        Long res = stringRedisTemplate.execute(script, Collections.singletonList(RedisConstant.ORDER_GRAB_PREFIX + orderId), workerId.toString(),String.valueOf(System.currentTimeMillis()));
         if(res==-1){throw new BizException(ErrorConstant.ORDER_NOT_EXISTS);}
         if(res==0){throw new BizException(ErrorConstant.ORDER_HAVE_BE_GRAB);}
+        if(res==-2){throw new BizException("请求过于频繁，请稍后");}
         if(res==1){
-            Orders orders=Orders.builder().id(orderId).status(OrderStatus.GRABBED.getCode()).workerId(workerId).updatedAt(LocalDateTime.now()).build();
+            // 计算服务者距离，叠加距离加价
+            Orders grabbed = ordersMapper.getOrderById(orderId);
+            Workers worker = workersMapper.selectById(workerId);
+            OrderAddressSnapshots address = ordersMapper.getOrderAddressSnapshotsByOrderId(orderId);
+            BigDecimal distanceFee = BigDecimal.ZERO;
+            if (worker != null && address != null
+                    && worker.getLastLat() != null && worker.getLastLng() != null
+                    && address.getLat() != null && address.getLng() != null) {
+                double km = haversine(worker.getLastLat().doubleValue(), worker.getLastLng().doubleValue(),
+                        address.getLat().doubleValue(), address.getLng().doubleValue());
+                BigDecimal[] money = skuService.calculateMoney(
+                        grabbed.getAppointmentTime(), grabbed.getBasePrice(), true, km);
+                distanceFee = money[2];
+            }
+
+            Orders orders=Orders.builder().id(orderId).status(OrderStatus.GRABBED.getCode())
+                    .workerId(workerId).distanceFee(distanceFee).updatedAt(LocalDateTime.now()).build();
             ordersMapper.updateOrders(orders);
 
             OrderEvents events=OrderEvents.builder().orderId(orderId).fromStatus(OrderStatus.WAITING.getCode()).toStatus(OrderStatus.GRABBED.getCode()).createdAt(LocalDateTime.now())
                     .operatorType(2).operatorId(workerId).remark(RemarkConstant.ORDER_HAVE_BE_GRAB).build();
             ordersMapper.insertOrderEvent(events);
             stringRedisTemplate.delete(RedisConstant.ORDER_GRAB_PREFIX+orderId);
-            Orders grabbed = ordersMapper.getOrderById(orderId);
             Notifications n = Notifications.builder().notificationType(2).createdAt(LocalDateTime.now())
                     .receiverType(0).receiverId(grabbed.getUserId()).relatedOrderId(orderId)
                     .title("服务者已接单").content("您的订单" + grabbed.getOrderNo() + "已被服务者接单").build();
@@ -145,6 +171,24 @@ public class WorkerServiceImpl implements IWorkerService {
         rocketMQTemplate.syncSend(RocketMQConstant.NOTIFICATION_TOPIC, n);
     }
 
+    /**
+     * Haversine 公式，计算两点间球面距离（km）
+     */
+    private double haversine(double lat1, double lng1, double lat2, double lng2) {
+        final double R = 6371.0;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLng = Math.toRadians(lng2 - lng1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                 * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
 
+    @Override
+    public String uploadAvatar(MultipartFile file) {
+        String url = fileService.upload(file);
+        workersMapper.updateAvatar(UserContext.getUserId(), url);
+        return url;
+    }
 }
 

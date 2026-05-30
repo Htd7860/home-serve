@@ -33,4 +33,6 @@ public interface UsersMapper{
     @Update("update users set last_login_at =#{time} where id=#{userId}")
     void updateLastLoginTime(LocalDateTime time,Long userId);
 
+    @Update("update users set avatar_url = #{avatarUrl} where id = #{id}")
+    int updateAvatar(Long id, String avatarUrl);
 }

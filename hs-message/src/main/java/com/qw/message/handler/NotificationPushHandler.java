@@ -2,12 +2,10 @@ package com.qw.message.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.qw.common.constant.RocketMQConstant;
 import com.qw.common.entity.Notifications;
 import com.qw.common.utils.JwtUtils;
 import com.qw.message.constant.ErrorConstant;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

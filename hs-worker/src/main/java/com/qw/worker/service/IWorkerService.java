@@ -3,6 +3,7 @@ package com.qw.worker.service;
 import com.qw.common.entity.Workers;
 import com.qw.order.entity.Orders;
 import com.qw.worker.dto.LocationRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,4 +29,6 @@ public interface IWorkerService {
     void startService(Long id);
 
     void completeService(Long id);
+
+    String uploadAvatar(MultipartFile file);
 }

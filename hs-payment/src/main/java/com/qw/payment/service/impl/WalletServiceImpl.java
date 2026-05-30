@@ -76,22 +76,27 @@ public class WalletServiceImpl implements WalletService {
 
     @Transactional
     @Override
-    public void settle(Long workerId, Long orderId, BigDecimal finalPrice) {
+    public void settle(Long workerId, Long orderId, BigDecimal finalPrice, BigDecimal distanceFee) {
+        if (paymentMapper.countEarningByOrderId(orderId) > 0) {
+            return;
+        }
         BigDecimal workerRatio=new BigDecimal("0.80");
-        BigDecimal workerAmount=finalPrice.multiply(workerRatio);
-        BigDecimal platformAmount=finalPrice.subtract(workerAmount);
+        BigDecimal distanceFeeSafe = distanceFee != null ? distanceFee : BigDecimal.ZERO;
+        BigDecimal workerAmount=finalPrice.multiply(workerRatio).add(distanceFeeSafe);
+        BigDecimal platformAmount=finalPrice.subtract(finalPrice.multiply(workerRatio));
 
+        WorkerWallets wallet = this.getByWorkerId(workerId);
         for(int i=0;i<3;i++){
-            WorkerWallets wallets=paymentMapper.getByWorkerId(workerId);
-            BigDecimal newBalance=wallets.getBalance().add(workerAmount);
-            BigDecimal totalEarned=wallets.getTotalEarned().add(workerAmount);
-            int rows=paymentMapper.addBalance(workerId,newBalance,totalEarned,wallets.getVersion());
+            BigDecimal newBalance=wallet.getBalance().add(workerAmount);
+            BigDecimal totalEarned=wallet.getTotalEarned().add(workerAmount);
+            int rows=paymentMapper.addBalance(workerId,newBalance,totalEarned,wallet.getVersion());
             if(rows==1){
                 WorkerEarnings workerEarnings=WorkerEarnings.builder().workerId(workerId).orderId(orderId)
                         .platformAmount(platformAmount).workerRatio(workerRatio).orderPrice(finalPrice).workerAmount(workerAmount).build();
                 paymentMapper.insertEarning(workerEarnings);
                 return;
             }
+            wallet = paymentMapper.getByWorkerId(workerId);
         }
         throw new BizException("分账失败，请重试");
     }

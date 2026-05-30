@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Mapper
 public interface PricingRuleMapper {
-    @Select("select * from pricing_rules where status ='ON'")
+    @Select("select * from pricing_rules where status = 1")
     List<PricingRules> getOnRules();
 
     @Select("select * from pricing_rules order by priority desc")

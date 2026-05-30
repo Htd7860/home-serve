@@ -12,6 +12,8 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 /**
  * @Author：qw
  * @Package：com.qw.payment.consumer
@@ -36,7 +38,8 @@ public class SettleConsumer implements RocketMQListener<String> {
             Long orderId = message.getOrderId();
             int rows = paymentMapper.countEarningByOrderId(orderId);
             if(rows>0){return;}
-            walletService.settle(message.getWorkerId(),orderId,message.getFinalPrice());
+            walletService.settle(message.getWorkerId(), orderId, message.getFinalPrice(),
+                    message.getDistanceFee() != null ? message.getDistanceFee() : BigDecimal.ZERO);
         } catch (JsonProcessingException e) {
             log.error("{}",e);
         }

@@ -8,6 +8,7 @@ import com.qw.admin.dto.ServiceCategoryRequest;
 import com.qw.admin.dto.SkuServiceRequest;
 import com.qw.admin.service.IAdminService;
 import com.qw.catalog.constant.RedisConstant;
+import com.qw.common.service.FileService;
 import com.qw.catalog.entity.ServiceCategories;
 import com.qw.catalog.entity.ServiceSkus;
 import com.qw.catalog.entity.PricingRules;
@@ -29,9 +30,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -68,6 +72,8 @@ public class AdminServiceImpl implements IAdminService {
     RBloomFilter skuBloomFilter;
     @Resource
     RBloomFilter categoryBloomFilter;
+    @Autowired
+    FileService fileService;
 
     @Transactional
     @Override
@@ -287,6 +293,11 @@ public class AdminServiceImpl implements IAdminService {
         }
         pricingCache.invalidate(com.qw.catalog.constant.RedisConstant.PRICING_RULE_KEY);
         stringRedisTemplate.delete(com.qw.catalog.constant.RedisConstant.PRICING_RULE_KEY);
+    }
+
+    @Override
+    public String uploadImg(MultipartFile file) {
+        return fileService.upload(file);
     }
 
     @Override

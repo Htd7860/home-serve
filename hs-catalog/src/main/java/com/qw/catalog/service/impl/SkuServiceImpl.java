@@ -3,7 +3,6 @@ package com.qw.catalog.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.benmanes.caffeine.cache.Cache;
-import com.qw.catalog.constant.CaffeineConstant;
 import com.qw.catalog.constant.RedisConstant;
 import com.qw.catalog.entity.PricingRules;
 import com.qw.catalog.entity.ServiceSkus;
@@ -66,13 +65,16 @@ public class SkuServiceImpl implements ISkuService {
         BigDecimal[] res=new BigDecimal[3];
         BigDecimal sum=BigDecimal.ZERO;
         res[1]=BigDecimal.ZERO;
+        res[2]=BigDecimal.ZERO;
         for (PricingRules rules : list) {
             String ruleConfig = rules.getRuleConfig();
             JSONObject jsonObject = JSON.parseObject(ruleConfig);
+            if(jsonObject==null){continue;}
             switch (rules.getRuleType()){
                 case "TIME_SURCHARGE":
                     LocalTime now=appointTime.toLocalTime();
                     List<String> peakHours = jsonObject.getJSONArray("peakHours").toJavaList(String.class);
+                    if(peakHours==null){continue;}
                     for (String peakHour : peakHours) {
                         LocalTime from =LocalTime.parse(peakHour.split("-")[0]);
                         LocalTime to=LocalTime.parse(peakHour.split("-")[1]);
